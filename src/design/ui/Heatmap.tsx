@@ -1,5 +1,7 @@
+import { formatDayMonth } from '../../domain/dates';
 import type { HeatmapWeek } from '../../domain/heatmap';
 import { cx } from '../../lib/cx';
+import { heatColor } from './heatColor';
 
 interface HeatmapProps {
   weeks: HeatmapWeek[];
@@ -10,12 +12,6 @@ interface HeatmapProps {
 }
 
 const ROW_LABELS = ['пн', '', 'ср', '', 'пт', '', ''];
-
-/** Цвет клетки: 0 — тёмно-серая, 1 — белая, между ними — плавно. */
-function cellColor(value: number): string {
-  const percent = Math.round(value * 100);
-  return `color-mix(in srgb, var(--wa-color-number) ${percent}%, var(--wa-color-gray-700))`;
-}
 
 /**
  * Тепловая карта в стиле GitHub: столбец — неделя, строка — день недели.
@@ -42,35 +38,43 @@ export function Heatmap({ weeks, today, label }: HeatmapProps) {
               <span
                 key={cell.date}
                 title={
-                  cell.value === null ? undefined : `${cell.date}: ${Math.round(cell.value * 100)}%`
+                  cell.value === null
+                    ? undefined
+                    : `${formatDayMonth(cell.date)}: ${Math.round(cell.value * 100)}%`
                 }
                 className={cx(
                   'aspect-square rounded-sm',
                   cell.value === null && 'border border-gray-800',
                   cell.date === today && 'outline-1 outline-offset-1 outline-number',
                 )}
-                style={cell.value === null ? undefined : { background: cellColor(cell.value) }}
+                style={cell.value === null ? undefined : { background: heatColor(cell.value) }}
               />
             )),
           )}
         </div>
       </div>
 
-      {/* Шкала: что значит яркость клетки. */}
-      <div
-        className="mt-2 flex items-center justify-end gap-1.5 text-xs text-muted"
-        aria-hidden="true"
-      >
-        0%
-        {[0, 0.33, 0.66, 1].map((value) => (
-          <span
-            key={value}
-            className="size-2.5 rounded-sm"
-            style={{ background: cellColor(value) }}
-          />
-        ))}
-        100%
-      </div>
+      <HeatScale from="0%" to="100%" />
+    </div>
+  );
+}
+
+/** Шкала яркости: что значат оттенки клеток и черт. */
+export function HeatScale({ from, to }: { from: string; to: string }) {
+  return (
+    <div
+      className="mt-2 flex items-center justify-end gap-1.5 text-xs text-muted"
+      aria-hidden="true"
+    >
+      {from}
+      {[0, 0.33, 0.66, 1].map((value) => (
+        <span
+          key={value}
+          className="size-2.5 rounded-sm"
+          style={{ background: heatColor(value) }}
+        />
+      ))}
+      {to}
     </div>
   );
 }

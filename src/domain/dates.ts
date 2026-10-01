@@ -74,6 +74,11 @@ export function formatDayMonth(key: DateKey): string {
   return format(fromDateKey(key), 'd MMMM', { locale: ru });
 }
 
+/** "5 окт" — для подписей осей. */
+export function formatShortDate(key: DateKey): string {
+  return format(fromDateKey(key), 'd MMM', { locale: ru }).replace('.', '');
+}
+
 /** "1 октября 2026" */
 export function formatFullDate(key: DateKey): string {
   return format(fromDateKey(key), 'd MMMM yyyy', { locale: ru });
