@@ -9,7 +9,7 @@ import { THEMES } from './design/themes';
 import { useAppStore } from './store/useAppStore';
 
 // Тема записывается в CSS-переменные до первого рендера — без мигания.
-applyTheme(THEMES[useAppStore.getState().settings.themeId]);
+applyTheme(THEMES[useAppStore.getState().data.settings.themeId]);
 
 const root = document.getElementById('root');
 if (!root) throw new Error('В index.html нет элемента #root');

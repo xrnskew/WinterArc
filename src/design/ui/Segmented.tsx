@@ -33,7 +33,7 @@ export function Segmented<T extends string>({ label, options, value, onChange }:
             />
             <span
               className={cx(
-                'flex h-10 cursor-pointer items-center justify-center rounded-sm px-3 text-sm',
+                'flex min-h-10 cursor-pointer items-center justify-center rounded-sm px-2 py-1 text-center text-sm leading-tight',
                 'transition-colors duration-(--wa-motion-fast)',
                 'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-1 peer-focus-visible:outline-number',
                 checked ? 'bg-gray-700 text-number' : 'text-muted hover:text-text',

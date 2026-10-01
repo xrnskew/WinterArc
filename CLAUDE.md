@@ -10,6 +10,9 @@
 - Владелец учит React: код простой и читаемый, понятные имена, комментарии
   по-русски, без «магии». Логика — в `src/domain` (без React, с тестами),
   экраны только показывают данные и вызывают действия.
+- Данные пользователя живут в localStorage годами. Меняешь типы в
+  `src/domain/types.ts` → подними `CURRENT_VERSION` в `src/storage/schema.ts`
+  и добавь шаг в `src/storage/migrations.ts`. Старые шаги не менять.
 - Все цвета, шрифты, радиусы, анимации — только из `src/design/themes/winter.ts`
   через классы Tailwind (`bg-night`, `text-muted`…). Текст — только цветами
   `text`, `muted`, `number`, `danger-text` (WCAG AA проверяет тест).

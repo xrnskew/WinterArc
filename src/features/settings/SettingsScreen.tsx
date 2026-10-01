@@ -6,6 +6,7 @@ import { Segmented } from '../../design/ui/Segmented';
 import { StepSlider } from '../../design/ui/StepSlider';
 import { useAppStore } from '../../store/useAppStore';
 import { StagePlaceholder } from '../StagePlaceholder';
+import { ArcSettings } from './ArcSettings';
 
 const PERFORMANCE_OPTIONS: { value: PerformanceMode; label: string }[] = [
   { value: 'auto', label: 'Авто' },
@@ -20,7 +21,7 @@ const PERFORMANCE_HINTS: Record<PerformanceMode, string> = {
 };
 
 export function SettingsScreen() {
-  const settings = useAppStore((state) => state.settings);
+  const settings = useAppStore((state) => state.data.settings);
   const updateSettings = useAppStore((state) => state.updateSettings);
 
   return (
@@ -28,6 +29,8 @@ export function SettingsScreen() {
       <ScreenHeader title="Настройки" />
 
       <div className="flex flex-col gap-4">
+        <ArcSettings />
+
         <GlassCard as="section" className="p-5">
           <StepSlider
             label="Снег на фоне"
@@ -49,7 +52,7 @@ export function SettingsScreen() {
         </GlassCard>
 
         <StagePlaceholder stage="з">
-          Арка, привычки, шкалы оценок, виджеты, экспорт и импорт данных, сброс.
+          Привычки, шкалы оценок, виджеты, экспорт и импорт данных, сброс.
         </StagePlaceholder>
       </div>
     </>

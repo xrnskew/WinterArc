@@ -7,5 +7,8 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   test: {
     include: ['src/**/*.test.ts'],
+    // Часовой пояс с переходом на зимнее время (25 октября 2026):
+    // так тесты дат ловят ошибки «23-часовых» суток.
+    env: { TZ: 'Europe/Berlin' },
   },
 });

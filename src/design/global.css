@@ -147,6 +147,42 @@
       0 0 14px rgb(10 10 10 / 0.85);
   }
 
+  /* Шторка (design/ui/Sheet.tsx): снизу на телефоне, по центру на десктопе. */
+  .wa-sheet {
+    width: 100%;
+    max-width: 36rem;
+    max-height: 92dvh;
+    margin: auto auto 0;
+    padding: 0;
+    color: var(--wa-color-text);
+    background: var(--wa-color-graphite);
+    border: 1px solid var(--wa-color-glass-border);
+    border-bottom: none;
+    border-radius: var(--wa-radius-lg) var(--wa-radius-lg) 0 0;
+    overflow: hidden;
+  }
+
+  .wa-sheet[open] {
+    animation: wa-sheet-in var(--wa-motion-base) var(--wa-motion-ease-out);
+  }
+
+  .wa-sheet::backdrop {
+    background: rgb(0 0 0 / 0.6);
+  }
+
+  @media (min-width: 768px) {
+    .wa-sheet {
+      margin: auto;
+      border-bottom: 1px solid var(--wa-color-glass-border);
+      border-radius: var(--wa-radius-lg);
+    }
+  }
+
+  /* Пока открыта шторка, страница под ней не прокручивается. */
+  html:has(.wa-sheet[open]) {
+    overflow: hidden;
+  }
+
   /* Ползунок: тонкая серая дорожка и белый квадратный бегунок. */
   .wa-range {
     appearance: none;
@@ -210,6 +246,17 @@
   }
   to {
     opacity: 0;
+  }
+}
+
+@keyframes wa-sheet-in {
+  from {
+    transform: translateY(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
   }
 }
 
