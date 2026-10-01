@@ -40,7 +40,7 @@ const UNIFORMS = [
   'uFallSpeed',
   'uWindOffset',
   'uWindSpeed',
-  'uLayers',
+  'uCopies',
   'uDensity',
   'uDriftAlpha',
   'uBackground',
@@ -88,7 +88,7 @@ export function createSnowScene(options: SnowSceneOptions): SnowScene {
     gl.uniform1f(uniform.uFallSpeed, preset.fallSpeed);
     gl.uniform1f(uniform.uWindOffset, state.windOffset);
     gl.uniform1f(uniform.uWindSpeed, state.windSpeed);
-    gl.uniform1f(uniform.uLayers, preset.layers);
+    gl.uniform1f(uniform.uCopies, preset.copies);
     gl.uniform1f(uniform.uDensity, preset.density);
     gl.uniform1f(uniform.uDriftAlpha, preset.driftAlpha);
     gl.drawArrays(gl.TRIANGLES, 0, 3);

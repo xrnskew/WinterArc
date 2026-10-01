@@ -285,6 +285,16 @@
   }
 }
 
+/* Покачивание снежинки из стороны в сторону (CSS-снег). */
+@keyframes wa-sway {
+  from {
+    transform: translateX(calc(var(--sway) * -1));
+  }
+  to {
+    transform: translateX(var(--sway));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   ::before,

@@ -1,14 +1,18 @@
 import type { SnowIntensity } from '../domain/types';
 
-/** Параметры метели для одной ступени ползунка. */
+/**
+ * Параметры метели для одной ступени ползунка.
+ * Слоёв глубины всегда три (дальний, средний, ближний); интенсивность — это
+ * сколько прослоек в каждом слое, как плотно они заполнены, скорость и ветер.
+ */
 export interface SnowPreset {
-  /** Слоёв глубины: от дальних мелких хлопьев к ближним крупным. */
-  layers: number;
+  /** Прослоек в каждом слое глубины (1…3): больше — гуще снег. */
+  copies: number;
   /** Доля ячеек, в которых есть хлопья (0…1). */
   density: number;
   /** Множитель скорости падения. */
   fallSpeed: number;
-  /** Сила ветра: 0 — штиль, 1 — обычные порывы. */
+  /** Сила ветра: 0 — штиль, 1 — обычный ветер. */
   wind: number;
   /** Непрозрачность позёмки у нижнего края. */
   driftAlpha: number;
@@ -20,31 +24,33 @@ export interface SnowPreset {
 
 export const SNOW_PRESETS: Record<Exclude<SnowIntensity, 'off'>, SnowPreset> = {
   light: {
-    layers: 3,
-    density: 0.32,
-    fallSpeed: 0.8,
-    wind: 0.35,
-    driftAlpha: 0.025,
+    copies: 1,
+    density: 0.4,
+    fallSpeed: 0.85,
+    wind: 0.6,
+    driftAlpha: 0.02,
     renderScale: 0.75,
-    cssFlakes: 14,
+    cssFlakes: 16,
   },
   snow: {
-    layers: 5,
-    density: 0.45,
+    copies: 2,
+    density: 0.5,
     fallSpeed: 1,
-    wind: 0.75,
-    driftAlpha: 0.045,
+    wind: 1,
+    driftAlpha: 0.035,
     renderScale: 0.7,
-    cssFlakes: 22,
+    cssFlakes: 26,
   },
+  // Буран — гуще и ветренее, но тоже плавный: ветер нарастает постепенно,
+  // а падение лишь чуть быстрее обычного.
   blizzard: {
-    layers: 7,
+    copies: 3,
     density: 0.62,
-    fallSpeed: 1.35,
-    wind: 1.5,
-    driftAlpha: 0.065,
+    fallSpeed: 1.25,
+    wind: 1.8,
+    driftAlpha: 0.05,
     renderScale: 0.6,
-    cssFlakes: 32,
+    cssFlakes: 38,
   },
 };
 

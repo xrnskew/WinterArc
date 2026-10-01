@@ -1,9 +1,11 @@
-import { between } from '../lib/random';
-
 /**
  * Ветер для метели.
  *
- * Скорость ветра = ровный фоновый ветерок + редкие порывы.
+ * Скорость ветра = слабый ровный ветерок + два слоя плавного шума:
+ * медленный (меняется за ~23 с) и «порывы» (за ~7 с). Шум не скачет:
+ * между случайными значениями — мягкий переход, поэтому порывы нарастают
+ * и затухают постепенно, без рывков.
+ *
  * Единица — высота экрана в секунду по горизонтали (плюс — вправо).
  * Шейдеру передаём не скорость, а накопленный снос (offset):
  * так хлопья не прыгают, когда скорость меняется.
@@ -19,73 +21,66 @@ export interface WindState {
 export interface Wind {
   /** Продвинуть время на dt секунд и получить новое состояние. */
   step(dt: number): WindState;
-  /** Сменить силу ветра (ползунок метели) без рывка. */
+  /** Сменить силу ветра (ползунок метели) — плавно, за пару секунд. */
   setStrength(strength: number): void;
 }
 
-interface Gust {
-  startsAt: number;
-  attack: number; // нарастание, с
-  hold: number; // пик, с
-  release: number; // затихание, с
-  peak: number; // скорость на пике (при силе ветра 1)
-}
+/** Скорость при силе 1: ровный ветерок + медленный шум + порывы. До 0,045 высоты экрана в секунду —
+ * вдвое медленнее падения ближних хлопьев: снег плывёт почти отвесно, ветер лишь клонит его. */
+const BREEZE = 0.006;
+const SLOW_AMPLITUDE = 0.012;
+const SLOW_PERIOD = 23; // с
+const GUST_AMPLITUDE = 0.027;
+const GUST_PERIOD = 7; // с
+/** За сколько секунд сила ветра почти догоняет новую после смены ползунка. */
+const STRENGTH_EASE = 2;
 
-/** Плавная ступенька 0 → 1 (как smoothstep в GLSL). */
-function smooth(t: number): number {
+/** Плавная ступенька 0 → 1 (как smoothstep в GLSL): в начале и в конце без рывка. */
+export function smooth(t: number): number {
   const x = Math.min(Math.max(t, 0), 1);
   return x * x * (3 - 2 * x);
 }
 
-/** Насколько порыв «включён» в момент time: 0…1. */
-export function gustEnvelope(gust: Gust, time: number): number {
-  const t = time - gust.startsAt;
-  if (t <= 0) return 0;
-  if (t < gust.attack) return smooth(t / gust.attack);
-  if (t < gust.attack + gust.hold) return 1;
-  return 1 - smooth((t - gust.attack - gust.hold) / gust.release);
-}
-
-function gustEnd(gust: Gust): number {
-  return gust.startsAt + gust.attack + gust.hold + gust.release;
+/**
+ * Плавный шум 0…1: через каждые period секунд — новое случайное значение,
+ * между ними — мягкий переход.
+ */
+export function createNoise(period: number, random: () => number): (time: number) => number {
+  let from = random();
+  let to = random();
+  let knotTime = 0; // когда было значение from
+  return (time) => {
+    while (time - knotTime >= period) {
+      knotTime += period;
+      from = to;
+      to = random();
+    }
+    return from + (to - from) * smooth((time - knotTime) / period);
+  };
 }
 
 export function createWind(strength: number, random: () => number = Math.random): Wind {
   let time = 0;
   let offset = 0;
   let currentStrength = strength;
-
-  const planGust = (after: number): Gust => ({
-    startsAt: after + between(random, 5, 14),
-    attack: between(random, 1, 2),
-    hold: between(random, 0.6, 2.4),
-    release: between(random, 2.5, 4.5),
-    peak: between(random, 0.22, 0.42),
-  });
-
-  let gust = planGust(0);
+  let targetStrength = strength;
+  const slow = createNoise(SLOW_PERIOD, random);
+  const gusts = createNoise(GUST_PERIOD, random);
 
   return {
     step(dt) {
       time += dt;
+      // Сила ветра догоняет новую постепенно: смена «Метель» → «Буран» без рывка.
+      currentStrength += (targetStrength - currentStrength) * Math.min(dt / STRENGTH_EASE, 1);
 
-      // Фоновый ветерок: сумма медленных синусов, всегда немного вправо.
-      const breeze =
-        0.05 +
-        0.025 * Math.sin(time * 0.13) +
-        0.015 * Math.sin(time * 0.31 + 1.7) +
-        0.008 * Math.sin(time * 0.71 + 0.4);
-
-      const gustSpeed = gust.peak * gustEnvelope(gust, time);
-      if (time > gustEnd(gust)) gust = planGust(time);
-
-      const speed = currentStrength * (breeze + gustSpeed);
+      const speed =
+        currentStrength * (BREEZE + SLOW_AMPLITUDE * slow(time) + GUST_AMPLITUDE * gusts(time));
       offset += speed * dt;
       return { speed, offset };
     },
 
     setStrength(next) {
-      currentStrength = next;
+      targetStrength = next;
     },
   };
 }
