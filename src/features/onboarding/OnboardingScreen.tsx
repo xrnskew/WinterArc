@@ -7,6 +7,7 @@ import { useToday } from '../../hooks/useToday';
 import { newId } from '../../lib/id';
 import { cx } from '../../lib/cx';
 import { useAppStore } from '../../store/useAppStore';
+import { ImportFromFile } from '../settings/ImportFromFile';
 import {
   initOnboarding,
   onboardingReducer,
@@ -26,6 +27,10 @@ export function OnboardingScreen() {
   const today = useToday();
   const habits = useAppStore((state) => state.data.habits);
   const startArc = useAppStore((state) => state.startArc);
+  // Первый запуск (или после удаления всех данных): можно загрузить копию вместо новой арки.
+  const firstLaunch = useAppStore((state) => state.data.arcs.length === 0);
+  const hasPreviousCopy = useAppStore((state) => state.hasPreviousCopy);
+  const restorePreviousCopy = useAppStore((state) => state.restorePreviousCopy);
   const navigate = useNavigate();
 
   // Начальное состояние считаем один раз — при открытии онбординга.
@@ -57,6 +62,24 @@ export function OnboardingScreen() {
             showErrors={state.showArcErrors}
             onChange={(patch) => dispatch({ type: 'editArc', patch })}
           />
+        )}
+        {state.step === 0 && firstLaunch && (
+          <section aria-label="Перенести данные" className="mt-8 border-t border-gray-800 pt-5">
+            <p className="on-snow text-sm text-muted">
+              Уже вёл арку на другом устройстве? Загрузи сохранённую копию данных.
+            </p>
+            <div className="mt-3 flex flex-col gap-2">
+              <ImportFromFile replacing={false} onImported={() => navigate(PATHS.center)} />
+              {hasPreviousCopy && (
+                <Button
+                  variant="ghost"
+                  onClick={() => restorePreviousCopy() && navigate(PATHS.center)}
+                >
+                  Вернуть данные до удаления
+                </Button>
+              )}
+            </div>
+          </section>
         )}
         {state.step === 1 && (
           <StepWhy

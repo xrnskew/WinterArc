@@ -62,7 +62,7 @@ export const MORE_ITEMS: NavItem[] = [
     to: PATHS.settings,
     label: 'Настройки',
     icon: SlidersHorizontal,
-    hint: 'Метель, арка, экспорт данных',
+    hint: 'Арка, привычки, шкалы, метель, копия данных',
   },
 ];
 

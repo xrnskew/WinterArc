@@ -1,4 +1,4 @@
-import type { AppData, DateKey, DayEntry, Id, RatingScale } from './types';
+import type { AppData, DateKey, DayEntry, IconName, Id, RatingScale, Timestamp } from './types';
 
 /** Оценки дня (шкалы 1–10) и заметка. */
 
@@ -14,6 +14,55 @@ export function getDayEntry(data: AppData, date: DateKey): DayEntry {
 /** Шкалы, которые сейчас используются. */
 export function activeScales(data: AppData): RatingScale[] {
   return data.ratingScales.filter((scale) => scale.archivedAt === null);
+}
+
+// ── Шкалы оценок ─────────────────────────────────────────
+
+/** Больше шкал — чек-ин становится слишком длинным. */
+export const MAX_SCALES = 6;
+export const SCALE_NAME_MAX = 24;
+
+/** Проверка названия шкалы. null — всё хорошо. */
+export function validateScaleName(name: string): string | null {
+  const clean = name.trim();
+  if (!clean) return 'Назови шкалу.';
+  if (clean.length > SCALE_NAME_MAX) return `Не длиннее ${SCALE_NAME_MAX} символов.`;
+  return null;
+}
+
+export function addScale(data: AppData, id: Id, name: string, icon: IconName): AppData {
+  return {
+    ...data,
+    ratingScales: [...data.ratingScales, { id, name: name.trim(), icon, archivedAt: null }],
+  };
+}
+
+export function updateScale(data: AppData, scaleId: Id, name: string, icon: IconName): AppData {
+  return {
+    ...data,
+    ratingScales: data.ratingScales.map((scale) =>
+      scale.id === scaleId ? { ...scale, name: name.trim(), icon } : scale,
+    ),
+  };
+}
+
+/** Убрать шкалу из чек-ина. Оценки остаются в истории, шкалу можно вернуть. */
+export function archiveScale(data: AppData, scaleId: Id, now: Timestamp): AppData {
+  return {
+    ...data,
+    ratingScales: data.ratingScales.map((scale) =>
+      scale.id === scaleId ? { ...scale, archivedAt: now } : scale,
+    ),
+  };
+}
+
+export function restoreScale(data: AppData, scaleId: Id): AppData {
+  return {
+    ...data,
+    ratingScales: data.ratingScales.map((scale) =>
+      scale.id === scaleId ? { ...scale, archivedAt: null } : scale,
+    ),
+  };
 }
 
 /** Записывает день; пустой день (без оценок и заметки) удаляется из данных. */

@@ -192,6 +192,48 @@ export function archiveHabit(data: AppData, habitId: Id, now: Timestamp): AppDat
   };
 }
 
+/** Привычки в архиве — их можно вернуть. Последние убранные — сверху. */
+export function archivedHabits(data: AppData): Habit[] {
+  return data.habits
+    .filter((habit) => habit.archivedAt !== null)
+    .sort((a, b) => b.archivedAt!.localeCompare(a.archivedAt!));
+}
+
+/** Вернуть из архива: привычка снова в чек-ине, в конце списка текущей арки. */
+export function restoreHabit(data: AppData, habitId: Id): AppData {
+  return {
+    ...data,
+    habits: data.habits.map((habit) =>
+      habit.id === habitId ? { ...habit, archivedAt: null } : habit,
+    ),
+    arcs: data.arcs.map((arc) =>
+      arc.id === data.activeArcId && !arc.habitIds.includes(habitId)
+        ? { ...arc, habitIds: [...arc.habitIds, habitId] }
+        : arc,
+    ),
+  };
+}
+
+/**
+ * Сдвинуть привычку на одно место вверх (-1) или вниз (+1) в текущей арке.
+ * Архивные в списке не видны, поэтому двигаем среди видимых, архивные — в конец.
+ */
+export function moveHabit(data: AppData, habitId: Id, step: -1 | 1): AppData {
+  return {
+    ...data,
+    arcs: data.arcs.map((arc) => {
+      if (arc.id !== data.activeArcId) return arc;
+      const visible = arcHabits(data, arc).map((habit) => habit.id);
+      const index = visible.indexOf(habitId);
+      const target = index + step;
+      if (index < 0 || target < 0 || target >= visible.length) return arc;
+      [visible[index], visible[target]] = [visible[target], visible[index]];
+      const hidden = arc.habitIds.filter((id) => !visible.includes(id));
+      return { ...arc, habitIds: [...visible, ...hidden] };
+    }),
+  };
+}
+
 // ── Подписи ──────────────────────────────────────────────
 
 export const HABIT_KIND_LABELS: Record<HabitKind, string> = {

@@ -13,6 +13,9 @@ export const backupKey = (version: number) => `winterarc:backup:v${version}`;
 /** Нечитаемые данные откладываем сюда, чтобы не потерять: winterarc:corrupt:<время>. */
 export const CORRUPT_KEY_PREFIX = 'winterarc:corrupt:';
 
+/** Копия данных перед импортом или сбросом — на случай, если передумаешь. */
+export const BEFORE_REPLACE_KEY = 'winterarc:before-replace';
+
 export type KeyValueStorage = Pick<Storage, 'getItem' | 'setItem'>;
 
 /**
@@ -92,4 +95,19 @@ export function saveData(storage: KeyValueStorage, data: AppData): boolean {
   } catch {
     return false;
   }
+}
+
+/** Сохранить копию текущих данных перед импортом или сбросом. false — не получилось. */
+export function saveCopyBeforeReplace(storage: KeyValueStorage, data: AppData): boolean {
+  try {
+    storage.setItem(BEFORE_REPLACE_KEY, JSON.stringify(data));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Копия данных до последнего импорта или сброса; null — копии нет. */
+export function readCopyBeforeReplace(storage: KeyValueStorage): string | null {
+  return storage.getItem(BEFORE_REPLACE_KEY);
 }

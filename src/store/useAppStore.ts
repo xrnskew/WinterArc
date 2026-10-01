@@ -7,6 +7,7 @@ import {
 } from '../domain/arc';
 import {
   addWidget as addWidgetToData,
+  resetDashboard as resetDashboardInData,
   moveWidget as moveWidgetInData,
   removeWidget as removeWidgetFromData,
   resizeWidget as resizeWidgetInData,
@@ -14,7 +15,14 @@ import {
 } from '../domain/dashboard';
 import { unlockAchievements as unlockInData } from '../domain/achievements';
 import { nowTimestamp } from '../domain/dates';
-import { setDayNote as setDayNoteInData, setRating as setRatingInData } from '../domain/days';
+import {
+  addScale as addScaleToData,
+  archiveScale as archiveScaleInData,
+  restoreScale as restoreScaleInData,
+  setDayNote as setDayNoteInData,
+  setRating as setRatingInData,
+  updateScale as updateScaleInData,
+} from '../domain/days';
 import {
   addEntry,
   addGoal as addGoalToData,
@@ -32,6 +40,8 @@ import {
   addHabit as addHabitToData,
   archiveHabit as archiveHabitInData,
   habitFromDraft,
+  moveHabit as moveHabitInData,
+  restoreHabit as restoreHabitInData,
   updateHabit as updateHabitInData,
   type HabitDraft,
 } from '../domain/habits';
@@ -47,6 +57,7 @@ import {
 import type {
   AppData,
   DateKey,
+  IconName,
   Id,
   Settings,
   WidgetInstance,
@@ -55,7 +66,16 @@ import type {
 } from '../domain/types';
 import { saveReview, type ReviewAnswers } from '../domain/weeklyReview';
 import { newId } from '../lib/id';
-import { loadData, openBrowserStorage, saveData, type LoadResult } from '../storage/localStore';
+import {
+  loadData,
+  openBrowserStorage,
+  readCopyBeforeReplace,
+  saveCopyBeforeReplace,
+  saveData,
+  type LoadResult,
+} from '../storage/localStore';
+import { parseBackup } from '../storage/backup';
+import { createEmptyData } from '../storage/schema';
 
 /**
  * Глобальное состояние приложения (Zustand).
@@ -92,6 +112,8 @@ interface AppState {
   canSave: boolean;
   /** Жетоны, полученные только что, — для всплывающего сообщения. Не сохраняются. */
   freshAchievements: string[];
+  /** Есть копия данных до последнего импорта или сброса — их можно вернуть. */
+  hasPreviousCopy: boolean;
 
   updateSettings: (patch: Partial<Settings>) => void;
   startArc: (request: StartArcRequest) => void;
@@ -101,10 +123,16 @@ interface AppState {
   addHabit: (draft: HabitDraft) => void;
   updateHabit: (habitId: Id, draft: HabitDraft) => void;
   archiveHabit: (habitId: Id) => void;
+  restoreHabit: (habitId: Id) => void;
+  moveHabit: (habitId: Id, step: -1 | 1) => void;
   /** Значение привычки за день: 1/0, штуки, минуты. */
   setHabitLog: (habitId: Id, date: DateKey, value: number) => void;
   setRating: (date: DateKey, scaleId: Id, value: number | null) => void;
   setDayNote: (date: DateKey, note: string) => void;
+  addScale: (name: string, icon: IconName) => void;
+  updateScale: (scaleId: Id, name: string, icon: IconName) => void;
+  archiveScale: (scaleId: Id) => void;
+  restoreScale: (scaleId: Id) => void;
 
   /** Новая цель привязывается к текущей арке. */
   addGoal: (draft: GoalDraft) => void;
@@ -129,6 +157,14 @@ interface AppState {
   removeWidget: (widgetId: Id) => void;
   moveWidget: (widgetId: Id, step: -1 | 1) => void;
   resizeWidget: (widgetId: Id, size: WidgetSize) => void;
+  resetDashboard: () => void;
+
+  /** Заменить все данные (импорт бэкапа). Текущие сохраняются копией. */
+  replaceData: (data: AppData) => void;
+  /** Удалить всё и начать с онбординга. Текущие данные сохраняются копией. */
+  resetAllData: () => void;
+  /** Вернуть данные до последнего импорта или сброса (а текущие — в копию). */
+  restorePreviousCopy: () => boolean;
 
   /** Ответы обзора недели; ключ — понедельник. */
   saveWeeklyReview: (monday: DateKey, answers: ReviewAnswers) => void;
@@ -155,7 +191,7 @@ function noticeFrom(result: LoadResult): StorageNotice {
 const { storage, persistent } = openBrowserStorage();
 const loaded = loadData(storage);
 
-export const useAppStore = create<AppState>((set) => {
+export const useAppStore = create<AppState>((set, get) => {
   /** Применяет изменение к данным: data → новые data. */
   const change = (update: (data: AppData) => AppData) =>
     set((state) => ({ data: update(state.data) }));
@@ -165,6 +201,7 @@ export const useAppStore = create<AppState>((set) => {
     notice: persistent ? noticeFrom(loaded) : { kind: 'noStorage' },
     canSave: loaded.status !== 'newer',
     freshAchievements: [],
+    hasPreviousCopy: readCopyBeforeReplace(storage) !== null,
 
     updateSettings: (patch) =>
       change((data) => ({ ...data, settings: { ...data.settings, ...patch } })),
@@ -188,12 +225,25 @@ export const useAppStore = create<AppState>((set) => {
 
     archiveHabit: (habitId) => change((data) => archiveHabitInData(data, habitId, nowTimestamp())),
 
+    restoreHabit: (habitId) => change((data) => restoreHabitInData(data, habitId)),
+
+    moveHabit: (habitId, step) => change((data) => moveHabitInData(data, habitId, step)),
+
     setHabitLog: (habitId, date, value) => change((data) => setLog(data, habitId, date, value)),
 
     setRating: (date, scaleId, value) =>
       change((data) => setRatingInData(data, date, scaleId, value)),
 
     setDayNote: (date, note) => change((data) => setDayNoteInData(data, date, note)),
+
+    addScale: (name, icon) => change((data) => addScaleToData(data, newId(), name, icon)),
+
+    updateScale: (scaleId, name, icon) =>
+      change((data) => updateScaleInData(data, scaleId, name, icon)),
+
+    archiveScale: (scaleId) => change((data) => archiveScaleInData(data, scaleId, nowTimestamp())),
+
+    restoreScale: (scaleId) => change((data) => restoreScaleInData(data, scaleId)),
 
     addGoal: (draft) =>
       change((data) =>
@@ -244,6 +294,23 @@ export const useAppStore = create<AppState>((set) => {
     moveWidget: (widgetId, step) => change((data) => moveWidgetInData(data, widgetId, step)),
 
     resizeWidget: (widgetId, size) => change((data) => resizeWidgetInData(data, widgetId, size)),
+
+    resetDashboard: () => change((data) => resetDashboardInData(data, newId)),
+
+    replaceData: (data) => {
+      const copied = saveCopyBeforeReplace(storage, get().data);
+      set({ data, freshAchievements: [], hasPreviousCopy: copied || get().hasPreviousCopy });
+    },
+
+    resetAllData: () => get().replaceData(createEmptyData(newId)),
+
+    restorePreviousCopy: () => {
+      const text = readCopyBeforeReplace(storage);
+      const result = text === null ? null : parseBackup(text);
+      if (!result?.ok) return false;
+      get().replaceData(result.data);
+      return true;
+    },
 
     saveWeeklyReview: (monday, answers) =>
       change((data) => saveReview(data, monday, answers, nowTimestamp())),

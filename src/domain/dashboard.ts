@@ -113,6 +113,11 @@ export function defaultDashboard(newId: () => Id): WidgetInstance[] {
 
 // ── Изменения раскладки ──────────────────────────────────
 
+/** Вернуть набор виджетов по умолчанию. */
+export function resetDashboard(data: AppData, newId: () => Id): AppData {
+  return { ...data, dashboard: defaultDashboard(newId) };
+}
+
 export function addWidget(data: AppData, widget: WidgetInstance): AppData {
   return { ...data, dashboard: [...data.dashboard, widget] };
 }
