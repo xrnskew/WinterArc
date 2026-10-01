@@ -63,7 +63,12 @@ export function initOnboarding(today: DateKey, existingHabits: Habit[]): Onboard
     draft: template.draft,
     selected: false,
   }));
-  return { step: 0, arc: defaultArcDraft(today), choices: [...kept, ...templates], showArcErrors: false };
+  return {
+    step: 0,
+    arc: defaultArcDraft(today),
+    choices: [...kept, ...templates],
+    showArcErrors: false,
+  };
 }
 
 export function onboardingReducer(

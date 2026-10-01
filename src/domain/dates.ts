@@ -89,3 +89,13 @@ export function formatRange(start: DateKey, end: DateKey): string {
   }
   return `${format(a, `${short} yyyy`, { locale: ru })} – ${format(b, `${short} yyyy`, { locale: ru })}`;
 }
+
+/** "Сегодня, 1 октября", "Вчера, 30 сентября", "Понедельник, 28 сентября". */
+export function formatDayLabel(key: DateKey, today: DateKey): string {
+  const diff = daysBetween(key, today);
+  const dayMonth = formatDayMonth(key);
+  if (diff === 0) return `Сегодня, ${dayMonth}`;
+  if (diff === 1) return `Вчера, ${dayMonth}`;
+  const weekday = format(fromDateKey(key), 'EEEE', { locale: ru });
+  return `${weekday[0].toUpperCase()}${weekday.slice(1)}, ${dayMonth}`;
+}

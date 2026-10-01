@@ -4,6 +4,7 @@ import { AnalyticsScreen } from '../features/analytics/AnalyticsScreen';
 import { CheckinScreen } from '../features/checkin/CheckinScreen';
 import { CommandCenterScreen } from '../features/command-center/CommandCenterScreen';
 import { GoalsScreen } from '../features/goals/GoalsScreen';
+import { HabitDetailScreen } from '../features/habits/HabitDetailScreen';
 import { HabitsScreen } from '../features/habits/HabitsScreen';
 import { KitScreen } from '../features/kit/KitScreen';
 import { MoreScreen } from '../features/more/MoreScreen';
@@ -25,6 +26,7 @@ export const router = createBrowserRouter([
       { path: PATHS.center, element: <CommandCenterScreen /> },
       { path: PATHS.checkin, element: <CheckinScreen /> },
       { path: PATHS.habits, element: <HabitsScreen /> },
+      { path: `${PATHS.habits}/:habitId`, element: <HabitDetailScreen /> },
       { path: PATHS.goals, element: <GoalsScreen /> },
       { path: PATHS.more, element: <MoreScreen /> },
       { path: PATHS.analytics, element: <AnalyticsScreen /> },

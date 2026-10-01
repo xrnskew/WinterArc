@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import { Link } from 'react-router';
 import { PATHS } from '../../app/routes';
 import {
@@ -9,13 +10,15 @@ import {
   daysUntilStart,
 } from '../../domain/arc';
 import { formatDayMonth, formatRange } from '../../domain/dates';
-import type { Arc, DateKey } from '../../domain/types';
+import { arcDayMarks } from '../../domain/discipline';
+import type { AppData, Arc, DateKey } from '../../domain/types';
 import { BigNumber } from '../../design/ui/BigNumber';
 import { plural } from '../../lib/plural';
 import { ArcTally } from '../arc/ArcTally';
 
 interface ArcHeroProps {
   arc: Arc;
+  data: AppData;
   today: DateKey;
 }
 
@@ -25,11 +28,13 @@ const days = (n: number) => plural(n, 'день', 'дня', 'дней');
  * Верх командного центра: название арки, отсчёт и зарубки.
  * Стоит прямо на метели, без стекла.
  */
-export function ArcHero({ arc, today }: ArcHeroProps) {
+export function ArcHero({ arc, data, today }: ArcHeroProps) {
   const phase = arcPhase(arc, today);
   const length = arcLength(arc);
   const dayNumber = arcDayNumber(arc, today);
   const percent = Math.round(arcProgress(arc, today) * 100);
+  // Индекс по всем дням арки пересчитываем, только когда поменялись данные или день.
+  const marks = useMemo(() => arcDayMarks(data, arc, today), [data, arc, today]);
 
   let number: number;
   let label: string;
@@ -58,6 +63,7 @@ export function ArcHero({ arc, today }: ArcHeroProps) {
         <ArcTally
           arc={arc}
           today={today}
+          marks={marks}
           label={`Арка: день ${dayNumber} из ${length}, пройдено ${percent}%`}
         />
         <div className="mt-2 flex justify-between gap-4 text-sm text-muted">

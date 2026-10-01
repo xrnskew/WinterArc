@@ -27,4 +27,5 @@ npm run dev      # dev-сервер; витрина дизайн-системы 
 npm test         # тесты Vitest
 npm run build    # проверка типов + сборка
 npm run lint     # oxlint
+npm run format   # Prettier
 ```

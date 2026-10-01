@@ -65,7 +65,10 @@ export interface ThemeTokens {
   };
 
   /** Шкала размеров текста (классическая типографская: 12 14 16 18 21 24 36 48 72 96). */
-  text: Record<'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl', TypeStep>;
+  text: Record<
+    'xs' | 'sm' | 'base' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl' | '5xl' | '6xl',
+    TypeStep
+  >;
 
   radius: { sm: string; md: string; lg: string };
 

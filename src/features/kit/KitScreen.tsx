@@ -71,7 +71,9 @@ function Typography() {
       <GlassCard className="flex flex-col gap-4 p-5">
         <div>
           <p className="screen-title text-3xl text-number">Обзор недели</p>
-          <p className="mt-1 text-xs text-muted">Oswald 500, заглавные — только заголовки экранов</p>
+          <p className="mt-1 text-xs text-muted">
+            Oswald 500, заглавные — только заголовки экранов
+          </p>
         </div>
         <div>
           <p className="text-base text-text">
@@ -169,7 +171,11 @@ function Controls() {
           >
             <Check size={22} strokeWidth={2.5} aria-hidden="true" />
             {flashes > 0 && (
-              <span key={flashes} className="flash absolute inset-0 rounded-md" aria-hidden="true" />
+              <span
+                key={flashes}
+                className="flash absolute inset-0 rounded-md"
+                aria-hidden="true"
+              />
             )}
           </button>
           <div className="min-w-0 flex-1">

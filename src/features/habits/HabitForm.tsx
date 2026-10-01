@@ -1,9 +1,5 @@
 import { useId, useState, type FormEvent } from 'react';
-import {
-  HABIT_KIND_LABELS,
-  validateHabitDraft,
-  type HabitDraft,
-} from '../../domain/habits';
+import { HABIT_KIND_LABELS, validateHabitDraft, type HabitDraft } from '../../domain/habits';
 import type { HabitKind, Schedule, Weekday } from '../../domain/types';
 import { Button } from '../../design/ui/Button';
 import { describedBy } from '../../design/ui/describedBy';
@@ -18,6 +14,8 @@ interface HabitFormProps {
   /** Текст главной кнопки: «Добавить привычку», «Сохранить». */
   submitLabel: string;
   currency: string;
+  /** Тип менять нельзя (правка существующей привычки: история записана в его формате). */
+  lockKind?: boolean;
   onSubmit: (draft: HabitDraft) => void;
   onCancel: () => void;
 }
@@ -50,7 +48,14 @@ const toNumber = (value: number | null) => value ?? NaN;
 const fromNumber = (value: number) => (Number.isNaN(value) ? null : value);
 
 /** Форма привычки всех четырёх типов. Ничего не сохраняет сама — отдаёт черновик наверх. */
-export function HabitForm({ initial, submitLabel, currency, onSubmit, onCancel }: HabitFormProps) {
+export function HabitForm({
+  initial,
+  submitLabel,
+  currency,
+  lockKind = false,
+  onSubmit,
+  onCancel,
+}: HabitFormProps) {
   const id = useId();
   const [draft, setDraft] = useState(initial);
   // Дни и «сколько раз» помним отдельно: при переключении расписания они не теряются.
@@ -88,33 +93,45 @@ export function HabitForm({ initial, submitLabel, currency, onSubmit, onCancel }
         />
       </Field>
 
-      <fieldset>
-        <legend className="mb-1.5 text-sm text-text">Тип</legend>
-        <div className="grid grid-cols-2 gap-2">
-          {KINDS.map((kind) => (
-            <label key={kind}>
-              <input
-                type="radio"
-                name={`${id}-kind`}
-                checked={draft.kind === kind}
-                onChange={() => update({ kind })}
-                className="peer sr-only"
-              />
-              <span
-                className={cx(
-                  'block h-full cursor-pointer rounded-md border px-3 py-2.5',
-                  'transition-colors duration-(--wa-motion-fast)',
-                  'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-number',
-                  draft.kind === kind ? 'border-number bg-gray-800' : 'border-gray-700 hover:border-gray-500',
-                )}
-              >
-                <span className="block text-sm text-text">{HABIT_KIND_LABELS[kind]}</span>
-                <span className="block text-xs text-muted">{KIND_HINTS[kind]}</span>
-              </span>
-            </label>
-          ))}
+      {lockKind ? (
+        <div>
+          <p className="text-sm text-text">Тип: {HABIT_KIND_LABELS[draft.kind].toLowerCase()}</p>
+          <p className="mt-1 text-sm text-muted">
+            Тип не меняется: история уже записана в этом формате. Нужен другой — создай новую
+            привычку.
+          </p>
         </div>
-      </fieldset>
+      ) : (
+        <fieldset>
+          <legend className="mb-1.5 text-sm text-text">Тип</legend>
+          <div className="grid grid-cols-2 gap-2">
+            {KINDS.map((kind) => (
+              <label key={kind}>
+                <input
+                  type="radio"
+                  name={`${id}-kind`}
+                  checked={draft.kind === kind}
+                  onChange={() => update({ kind })}
+                  className="peer sr-only"
+                />
+                <span
+                  className={cx(
+                    'block h-full cursor-pointer rounded-md border px-3 py-2.5',
+                    'transition-colors duration-(--wa-motion-fast)',
+                    'peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-number',
+                    draft.kind === kind
+                      ? 'border-number bg-gray-800'
+                      : 'border-gray-700 hover:border-gray-500',
+                  )}
+                >
+                  <span className="block text-sm text-text">{HABIT_KIND_LABELS[kind]}</span>
+                  <span className="block text-xs text-muted">{KIND_HINTS[kind]}</span>
+                </span>
+              </label>
+            ))}
+          </div>
+        </fieldset>
+      )}
 
       {draft.kind === 'count' && (
         <div className="grid grid-cols-2 gap-3">
@@ -197,7 +214,11 @@ export function HabitForm({ initial, submitLabel, currency, onSubmit, onCancel }
             options={SCHEDULE_OPTIONS}
           />
           {draft.schedule.type === 'weekdays' && (
-            <WeekdayPicker value={weekdays} onChange={setWeekdays} invalid={Boolean(errors.schedule)} />
+            <WeekdayPicker
+              value={weekdays}
+              onChange={setWeekdays}
+              invalid={Boolean(errors.schedule)}
+            />
           )}
           {draft.schedule.type === 'timesPerWeek' && (
             <TimesPicker value={times} onChange={setTimes} />

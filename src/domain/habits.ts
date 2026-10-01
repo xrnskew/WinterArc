@@ -1,6 +1,8 @@
 import { plural } from '../lib/plural';
 import type {
   AccentKey,
+  AppData,
+  Arc,
   DateKey,
   Habit,
   HabitKind,
@@ -12,8 +14,8 @@ import type {
 } from './types';
 
 /**
- * Привычки. Этап «б»: черновик (форма) → привычка, проверка формы, подписи.
- * Выполнение, серии, чистые дни и деньги — этап «в».
+ * Привычки: черновик (форма) → привычка, проверка формы, изменения в данных, подписи.
+ * Выполнение и серии — в progress.ts, отказы — в abstain.ts.
  */
 
 // ── Черновик привычки (форма) ────────────────────────────
@@ -165,6 +167,63 @@ export function activeHabits(habits: Habit[]): Habit[] {
   return habits.filter((habit) => habit.archivedAt === null);
 }
 
+export function getHabit(data: AppData, habitId: Id): Habit | null {
+  return data.habits.find((habit) => habit.id === habitId) ?? null;
+}
+
+/** Привычки арки в порядке показа, без архивных. */
+export function arcHabits(data: AppData, arc: Arc): Habit[] {
+  return arc.habitIds.flatMap((id) => {
+    const habit = getHabit(data, id);
+    return habit && habit.archivedAt === null ? [habit] : [];
+  });
+}
+
+// ── Изменения данных ─────────────────────────────────────
+
+/** Добавляет привычку и ставит её в конец списка текущей арки. */
+export function addHabit(data: AppData, habit: Habit): AppData {
+  return {
+    ...data,
+    habits: [...data.habits, habit],
+    arcs: data.arcs.map((arc) =>
+      arc.id === data.activeArcId ? { ...arc, habitIds: [...arc.habitIds, habit.id] } : arc,
+    ),
+  };
+}
+
+/**
+ * Меняет привычку по черновику. Тип не меняется: история записана
+ * в формате этого типа (штуки, минуты…). id, дата создания и начало
+ * отсчёта отказа тоже остаются прежними.
+ */
+export function updateHabit(data: AppData, habitId: Id, draft: HabitDraft): AppData {
+  return {
+    ...data,
+    habits: data.habits.map((habit) => {
+      if (habit.id !== habitId) return habit;
+      const startDate = habit.kind === 'abstain' ? habit.startDate : '';
+      const updated = habitFromDraft(
+        { ...draft, kind: habit.kind },
+        habit.id,
+        habit.createdAt,
+        startDate,
+      );
+      return { ...updated, archivedAt: habit.archivedAt };
+    }),
+  };
+}
+
+/** Убирает привычку в архив: из списков пропадает, история и статистика остаются. */
+export function archiveHabit(data: AppData, habitId: Id, now: Timestamp): AppData {
+  return {
+    ...data,
+    habits: data.habits.map((habit) =>
+      habit.id === habitId ? { ...habit, archivedAt: now } : habit,
+    ),
+  };
+}
+
 // ── Подписи ──────────────────────────────────────────────
 
 export const HABIT_KIND_LABELS: Record<HabitKind, string> = {
@@ -219,7 +278,12 @@ export function describeHabit(draft: HabitDraft, currency: string): string {
 }
 
 /** Цель привычки одной строкой: "20 страниц", "45 мин в день", "чистые дни". */
-export function describeTarget(habit: Pick<HabitDraft, 'kind' | 'unit' | 'dailyTarget' | 'targetMinutes' | 'targetPeriod' | 'costPerDay'>): string {
+export function describeTarget(
+  habit: Pick<
+    HabitDraft,
+    'kind' | 'unit' | 'dailyTarget' | 'targetMinutes' | 'targetPeriod' | 'costPerDay'
+  >,
+): string {
   switch (habit.kind) {
     case 'check':
       return 'сделал или нет';

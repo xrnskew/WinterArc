@@ -31,7 +31,16 @@ function isObject(value: unknown): value is RawData {
 
 /** Грубая проверка формы: все ли разделы на месте и нужного типа. */
 function looksLikeAppData(data: RawData): data is RawData & AppData {
-  const arrays = ['arcs', 'habits', 'abstainEvents', 'ratingScales', 'goals', 'tasks', 'achievements', 'dashboard'];
+  const arrays = [
+    'arcs',
+    'habits',
+    'abstainEvents',
+    'ratingScales',
+    'goals',
+    'tasks',
+    'achievements',
+    'dashboard',
+  ];
   const objects = ['settings', 'habitLogs', 'days', 'weeklyReviews'];
   return (
     arrays.every((key) => Array.isArray(data[key])) &&

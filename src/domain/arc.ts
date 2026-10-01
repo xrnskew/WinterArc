@@ -106,9 +106,10 @@ export function defaultArcDraft(today: DateKey): ArcDraft {
     name: `Winter Arc ${year}`,
     startDate,
     // Если сегодня последние дни декабря — даём хотя бы минимальную длину.
-    endDate: daysBetween(startDate, seasonEnd) + 1 >= ARC_MIN_DAYS
-      ? seasonEnd
-      : addDays(startDate, ARC_MIN_DAYS - 1),
+    endDate:
+      daysBetween(startDate, seasonEnd) + 1 >= ARC_MIN_DAYS
+        ? seasonEnd
+        : addDays(startDate, ARC_MIN_DAYS - 1),
     why: '',
   };
 }

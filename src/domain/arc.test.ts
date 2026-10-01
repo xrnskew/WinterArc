@@ -153,7 +153,12 @@ describe('изменения данных', () => {
   });
 
   it('archiveActiveArc уносит арку в историю, привычки остаются', () => {
-    const started = startArc(createEmptyData(fakeId), { draft, newHabits: [reading], keptHabitIds: [] }, 'arc-1', NOW);
+    const started = startArc(
+      createEmptyData(fakeId),
+      { draft, newHabits: [reading], keptHabitIds: [] },
+      'arc-1',
+      NOW,
+    );
     const archived = archiveActiveArc(started, '2027-01-01T10:00:00.000Z');
 
     expect(archived.activeArcId).toBeNull();
@@ -162,7 +167,12 @@ describe('изменения данных', () => {
   });
 
   it('новая арка может взять привычки прошлой', () => {
-    const first = startArc(createEmptyData(fakeId), { draft, newHabits: [reading], keptHabitIds: [] }, 'arc-1', NOW);
+    const first = startArc(
+      createEmptyData(fakeId),
+      { draft, newHabits: [reading], keptHabitIds: [] },
+      'arc-1',
+      NOW,
+    );
     const archived = archiveActiveArc(first, NOW);
     const next = startArc(
       archived,
@@ -175,7 +185,12 @@ describe('изменения данных', () => {
   });
 
   it('updateArc меняет только нужную арку', () => {
-    const data = startArc(createEmptyData(fakeId), { draft, newHabits: [], keptHabitIds: [] }, 'arc-1', NOW);
+    const data = startArc(
+      createEmptyData(fakeId),
+      { draft, newHabits: [], keptHabitIds: [] },
+      'arc-1',
+      NOW,
+    );
     const updated = updateArc(data, 'arc-1', { ...draft, name: 'Новая', endDate: '2027-01-31' });
     expect(getActiveArc(updated)).toMatchObject({ name: 'Новая', endDate: '2027-01-31' });
   });

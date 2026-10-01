@@ -1,10 +1,5 @@
 import { useState } from 'react';
-import {
-  getActiveArc,
-  getArchivedArcs,
-  validateArcDraft,
-  type ArcDraft,
-} from '../../domain/arc';
+import { getActiveArc, getArchivedArcs, validateArcDraft, type ArcDraft } from '../../domain/arc';
 import { formatRange } from '../../domain/dates';
 import type { Arc } from '../../domain/types';
 import { Button } from '../../design/ui/Button';
@@ -66,8 +61,8 @@ export function ArcSettings() {
 
       <Sheet open={sheet === 'archive'} onClose={() => setSheet(null)} title="Завершить арку?">
         <p className="text-base text-text">
-          «{arc.name}» уйдёт в историю вместе со всей статистикой. Привычки останутся: их можно взять
-          в новую арку.
+          «{arc.name}» уйдёт в историю вместе со всей статистикой. Привычки останутся: их можно
+          взять в новую арку.
         </p>
         <p className="mt-2 text-sm text-muted">Сразу после этого начнём новую арку.</p>
         <div className="mt-6 flex flex-col gap-2">

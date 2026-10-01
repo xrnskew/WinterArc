@@ -21,7 +21,10 @@ export function DateInput({ className, ...rest }: InputHTMLAttributes<HTMLInputE
   return <input type="date" className={cx(FIELD_CLASS, 'h-12 px-2.5', className)} {...rest} />;
 }
 
-interface NumberInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'value' | 'onChange'> {
+interface NumberInputProps extends Omit<
+  InputHTMLAttributes<HTMLInputElement>,
+  'value' | 'onChange'
+> {
   /** null — поле пустое. */
   value: number | null;
   onChange: (value: number | null) => void;
@@ -42,7 +45,9 @@ export function NumberInput({ value, onChange, className, ...rest }: NumberInput
 }
 
 export function TextArea({ className, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
-  return <textarea className={cx(FIELD_CLASS, 'min-h-28 resize-y px-3 py-3', className)} {...rest} />;
+  return (
+    <textarea className={cx(FIELD_CLASS, 'min-h-28 resize-y px-3 py-3', className)} {...rest} />
+  );
 }
 
 interface FieldProps {

@@ -18,7 +18,10 @@ interface CountUpOptions {
  * Анимация идёт, только когда target изменился (или при fromZero на старте),
  * а при «Уменьшить движение» число просто меняется.
  */
-export function useCountUp(target: number, { duration = 900, fromZero = false }: CountUpOptions = {}) {
+export function useCountUp(
+  target: number,
+  { duration = 900, fromZero = false }: CountUpOptions = {},
+) {
   const reducedMotion = useReducedMotion();
   const [value, setValue] = useState(fromZero && !reducedMotion ? 0 : target);
   const shownRef = useRef(value);

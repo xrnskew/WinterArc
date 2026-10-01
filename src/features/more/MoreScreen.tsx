@@ -24,7 +24,12 @@ export function MoreScreen() {
                   to={item.to}
                   className="flex items-center gap-4 px-4 py-3.5 transition-colors duration-(--wa-motion-fast) hover:bg-gray-800/60"
                 >
-                  <Icon size={22} strokeWidth={1.5} className="shrink-0 text-text" aria-hidden="true" />
+                  <Icon
+                    size={22}
+                    strokeWidth={1.5}
+                    className="shrink-0 text-text"
+                    aria-hidden="true"
+                  />
                   <span className="min-w-0 flex-1">
                     <span className="block text-base text-text">{item.label}</span>
                     <span className="block text-sm text-muted">{item.hint}</span>

@@ -18,8 +18,7 @@ export function backupFileName(today: DateKey): string {
 }
 
 export type ImportResult =
-  | { ok: true; data: AppData; migratedFrom: number | null }
-  | { ok: false; error: string };
+  { ok: true; data: AppData; migratedFrom: number | null } | { ok: false; error: string };
 
 export function parseBackup(text: string): ImportResult {
   let raw: unknown;

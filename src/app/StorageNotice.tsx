@@ -43,7 +43,12 @@ export function NewerDataScreen({ version }: { version: number }) {
       <p className="on-snow mt-2 text-base text-muted">
         Перезагрузи страницу: обычно новая версия уже скачалась.
       </p>
-      <Button variant="primary" size="lg" className="mt-8 self-start" onClick={() => location.reload()}>
+      <Button
+        variant="primary"
+        size="lg"
+        className="mt-8 self-start"
+        onClick={() => location.reload()}
+      >
         Перезагрузить
       </Button>
     </div>

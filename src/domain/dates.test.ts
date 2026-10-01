@@ -3,6 +3,7 @@ import {
   addDays,
   daysBetween,
   eachDay,
+  formatDayLabel,
   formatDayMonth,
   formatRange,
   isDateKey,
@@ -61,6 +62,12 @@ describe('даты', () => {
     expect(formatDayMonth('2026-10-01')).toBe('1 октября');
     expect(formatRange('2026-10-01', '2026-12-31')).toBe('1 окт. – 31 дек. 2026');
     expect(formatRange('2026-12-01', '2027-01-31')).toBe('1 дек. 2026 – 31 янв. 2027');
+  });
+
+  it('подпись дня в чек-ине', () => {
+    expect(formatDayLabel('2026-10-01', '2026-10-01')).toBe('Сегодня, 1 октября');
+    expect(formatDayLabel('2026-09-30', '2026-10-01')).toBe('Вчера, 30 сентября');
+    expect(formatDayLabel('2026-09-28', '2026-10-01')).toBe('Понедельник, 28 сентября');
   });
 });
 

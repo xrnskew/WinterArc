@@ -30,7 +30,8 @@ export function StepArc({ draft, today, showErrors, onChange }: StepArcProps) {
         <div className="on-snow mt-8">
           <BigNumber value={length} size="xl" fromZero />
           <p className="mt-1 text-sm text-muted">
-            {plural(length, 'день', 'дня', 'дней')} в арке, {formatRange(draft.startDate, draft.endDate)}
+            {plural(length, 'день', 'дня', 'дней')} в арке,{' '}
+            {formatRange(draft.startDate, draft.endDate)}
           </p>
           <div className="mt-5">
             <ArcTally arc={draft} today={today} label={`Арка на ${length} дней`} />

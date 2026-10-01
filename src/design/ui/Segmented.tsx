@@ -13,7 +13,12 @@ interface SegmentedProps<T extends string> {
  * Переключатель из нескольких вариантов.
  * Внутри — обычные radio-кнопки: стрелки и Tab работают сами.
  */
-export function Segmented<T extends string>({ label, options, value, onChange }: SegmentedProps<T>) {
+export function Segmented<T extends string>({
+  label,
+  options,
+  value,
+  onChange,
+}: SegmentedProps<T>) {
   const name = useId();
 
   return (

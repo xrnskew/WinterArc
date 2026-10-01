@@ -25,6 +25,9 @@ export const PATHS = {
   kit: '/kit',
 } as const;
 
+/** Адрес страницы привычки. */
+export const habitPath = (habitId: string) => `/habits/${habitId}`;
+
 export interface NavItem {
   to: string;
   label: string;

@@ -45,7 +45,13 @@ export function Tally({ days, label, todayCaption, minUnitPx = MIN_UNIT_PX }: Ta
   const glowId = `tally-glow-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
 
   const layout =
-    width > 0 ? layoutTally(days.map((d) => d.weekday), width, minUnitPx) : null;
+    width > 0
+      ? layoutTally(
+          days.map((d) => d.weekday),
+          width,
+          minUnitPx,
+        )
+      : null;
   const rowPitch = ROW_HEIGHT + TODAY_EXTRA + ROW_GAP;
   const height = layout ? layout.rows * rowPitch - ROW_GAP : ROW_HEIGHT + TODAY_EXTRA;
 

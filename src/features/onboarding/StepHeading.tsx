@@ -18,7 +18,11 @@ export function StepHeading({ title, children }: StepHeadingProps) {
 
   return (
     <header>
-      <h1 ref={ref} tabIndex={-1} className="screen-title on-snow text-3xl text-number outline-none">
+      <h1
+        ref={ref}
+        tabIndex={-1}
+        className="screen-title on-snow text-3xl text-number outline-none"
+      >
         {title}
       </h1>
       <p className="on-snow mt-2 text-base text-muted">{children}</p>

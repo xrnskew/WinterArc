@@ -183,6 +183,32 @@
     overflow: hidden;
   }
 
+  /* Полноэкранный режим (тяга сейчас): только дыхание, без экрана под ним. */
+  .wa-fullscreen {
+    width: 100%;
+    max-width: none;
+    height: 100dvh;
+    max-height: none;
+    margin: 0;
+    padding: 0;
+    color: var(--wa-color-text);
+    background: var(--wa-color-night);
+    border: none;
+  }
+
+  .wa-fullscreen::backdrop {
+    background: transparent;
+  }
+
+  html:has(.wa-fullscreen[open]) {
+    overflow: hidden;
+  }
+
+  /* Квадрат дыхания 4-4-6: вдох 4 с, задержка 4 с, выдох 6 с. */
+  .wa-breathe {
+    animation: wa-breathe 14s ease-in-out infinite;
+  }
+
   /* Ползунок: тонкая серая дорожка и белый квадратный бегунок. */
   .wa-range {
     appearance: none;
@@ -246,6 +272,21 @@
   }
   to {
     opacity: 0;
+  }
+}
+
+@keyframes wa-breathe {
+  0% {
+    transform: scale(0.55);
+  }
+  28.57% {
+    transform: scale(1);
+  }
+  57.14% {
+    transform: scale(1);
+  }
+  100% {
+    transform: scale(0.55);
   }
 }
 

@@ -45,7 +45,5 @@ export function applyTheme(theme: ThemeTokens): void {
     root.style.setProperty(name, value);
   }
   root.dataset.theme = theme.id;
-  document
-    .querySelector('meta[name="theme-color"]')
-    ?.setAttribute('content', theme.color.night);
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme.color.night);
 }

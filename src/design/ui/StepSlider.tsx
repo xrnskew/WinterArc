@@ -10,7 +10,12 @@ interface StepSliderProps<T extends string> {
 }
 
 /** Ползунок с несколькими ступенями и подписями под ним. */
-export function StepSlider<T extends string>({ label, steps, value, onChange }: StepSliderProps<T>) {
+export function StepSlider<T extends string>({
+  label,
+  steps,
+  value,
+  onChange,
+}: StepSliderProps<T>) {
   const id = useId();
   const index = Math.max(
     0,

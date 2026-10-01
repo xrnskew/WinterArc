@@ -55,9 +55,7 @@ export function CssSnow({ count, still, snowflake }: CssSnowProps) {
           background: snowflake,
           opacity: flake.opacity,
           '--drift': `${flake.drift}vw`,
-          animation: still
-            ? 'none'
-            : `wa-fall ${flake.duration}s linear ${flake.delay}s infinite`,
+          animation: still ? 'none' : `wa-fall ${flake.duration}s linear ${flake.delay}s infinite`,
           willChange: still ? undefined : 'transform',
         };
         return <span key={index} style={style} />;
