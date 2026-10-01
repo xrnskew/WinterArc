@@ -21,7 +21,7 @@ const draft = (patch: Partial<HabitDraft>): HabitDraft => ({
 
 describe('черновик → привычка', () => {
   it('да/нет не тащит лишних полей', () => {
-    const habit = habitFromDraft(draft({ kind: 'check' }), 'h1', NOW, '2026-10-01');
+    const habit = habitFromDraft(draft({ kind: 'check' }), 'h1', NOW);
     expect(habit).toEqual({
       id: 'h1',
       name: 'Привычка',
@@ -39,24 +39,8 @@ describe('черновик → привычка', () => {
       draft({ kind: 'count', unit: ' страниц ', dailyTarget: 20 }),
       'h1',
       NOW,
-      '2026-10-01',
     );
     expect(habit).toMatchObject({ kind: 'count', unit: 'страниц', dailyTarget: 20 });
-  });
-
-  it('отказ — всегда каждый день, с даты начала', () => {
-    const habit = habitFromDraft(
-      draft({ kind: 'abstain', schedule: { type: 'timesPerWeek', times: 3 }, costPerDay: 300 }),
-      'h1',
-      NOW,
-      '2026-10-01',
-    );
-    expect(habit).toMatchObject({
-      kind: 'abstain',
-      schedule: { type: 'daily' },
-      startDate: '2026-10-01',
-      costPerDay: 300,
-    });
   });
 
   it('дни недели сортируются и не повторяются', () => {
@@ -64,7 +48,6 @@ describe('черновик → привычка', () => {
       draft({ schedule: { type: 'weekdays', days: [5, 1, 3, 1] } }),
       'h1',
       NOW,
-      '2026-10-01',
     );
     expect(habit.schedule).toEqual({ type: 'weekdays', days: [1, 3, 5] });
   });
@@ -74,9 +57,8 @@ describe('черновик → привычка', () => {
       draft({ kind: 'time', targetMinutes: 90, targetPeriod: 'week' }),
       'h1',
       NOW,
-      '2026-10-01',
     );
-    expect(habitFromDraft(draftFromHabit(habit), 'h1', NOW, '2026-10-01')).toEqual(habit);
+    expect(habitFromDraft(draftFromHabit(habit), 'h1', NOW)).toEqual(habit);
   });
 });
 

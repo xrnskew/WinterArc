@@ -25,7 +25,6 @@ import { StepWhy } from './StepWhy';
 export function OnboardingScreen() {
   const today = useToday();
   const habits = useAppStore((state) => state.data.habits);
-  const currency = useAppStore((state) => state.data.settings.currency);
   const startArc = useAppStore((state) => state.startArc);
   const navigate = useNavigate();
 
@@ -68,7 +67,6 @@ export function OnboardingScreen() {
         {state.step === 2 && (
           <StepHabits
             choices={state.choices}
-            currency={currency}
             onToggle={(key) => dispatch({ type: 'toggle', key })}
             onSave={(key, draft) =>
               dispatch({ type: 'saveHabit', key, newKey: `custom:${newId()}`, draft })

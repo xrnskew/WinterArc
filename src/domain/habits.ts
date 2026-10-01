@@ -3,7 +3,6 @@ import type {
   AccentKey,
   AppData,
   Arc,
-  DateKey,
   Habit,
   HabitKind,
   IconName,
@@ -15,13 +14,13 @@ import type {
 
 /**
  * Привычки: черновик (форма) → привычка, проверка формы, изменения в данных, подписи.
- * Выполнение и серии — в progress.ts, отказы — в abstain.ts.
+ * Выполнение и серии — в progress.ts.
  */
 
 // ── Черновик привычки (форма) ────────────────────────────
 
 /**
- * Всё, что можно ввести в форме привычки. Поля всех четырёх типов лежат
+ * Всё, что можно ввести в форме привычки. Поля всех трёх типов лежат
  * рядом: при переключении типа введённое не теряется. Лишние поля
  * отбрасывает habitFromDraft.
  */
@@ -37,8 +36,6 @@ export interface HabitDraft {
   /** time */
   targetMinutes: number;
   targetPeriod: 'day' | 'week';
-  /** abstain */
-  costPerDay: number | null;
 }
 
 export const EMPTY_HABIT_DRAFT: HabitDraft = {
@@ -51,7 +48,6 @@ export const EMPTY_HABIT_DRAFT: HabitDraft = {
   dailyTarget: 10,
   targetMinutes: 30,
   targetPeriod: 'day',
-  costPerDay: null,
 };
 
 export const HABIT_NAME_MAX = 40;
@@ -79,9 +75,6 @@ export function validateHabitDraft(draft: HabitDraft): HabitDraftErrors {
   if (draft.kind === 'time' && !isPositive(draft.targetMinutes)) {
     errors.target = 'Цель по времени — больше нуля минут.';
   }
-  if (draft.kind === 'abstain' && draft.costPerDay !== null && !(draft.costPerDay >= 0)) {
-    errors.cost = 'Стоимость — число не меньше нуля.';
-  }
 
   const { schedule } = draft;
   if (schedule.type === 'weekdays' && schedule.days.length === 0) {
@@ -93,16 +86,8 @@ export function validateHabitDraft(draft: HabitDraft): HabitDraftErrors {
   return errors;
 }
 
-/**
- * Превращает черновик в привычку нужного типа.
- * @param startDate с какого дня считать чистые дни (для отказа)
- */
-export function habitFromDraft(
-  draft: HabitDraft,
-  id: Id,
-  now: Timestamp,
-  startDate: DateKey,
-): Habit {
+/** Превращает черновик в привычку нужного типа. */
+export function habitFromDraft(draft: HabitDraft, id: Id, now: Timestamp): Habit {
   const base = {
     id,
     name: draft.name.trim(),
@@ -125,15 +110,6 @@ export function habitFromDraft(
         targetMinutes: draft.targetMinutes,
         targetPeriod: draft.targetPeriod,
       };
-    case 'abstain':
-      // Отказ — это каждый день, другое расписание не имеет смысла.
-      return {
-        ...base,
-        kind: 'abstain',
-        schedule: { type: 'daily' },
-        startDate,
-        costPerDay: draft.costPerDay,
-      };
   }
 }
 
@@ -151,7 +127,6 @@ export function draftFromHabit(habit: Habit): HabitDraft {
       targetMinutes: habit.targetMinutes,
       targetPeriod: habit.targetPeriod,
     }),
-    ...(habit.kind === 'abstain' && { costPerDay: habit.costPerDay }),
   };
 }
 
@@ -194,21 +169,14 @@ export function addHabit(data: AppData, habit: Habit): AppData {
 
 /**
  * Меняет привычку по черновику. Тип не меняется: история записана
- * в формате этого типа (штуки, минуты…). id, дата создания и начало
- * отсчёта отказа тоже остаются прежними.
+ * в формате этого типа (штуки, минуты…). id и дата создания тоже остаются прежними.
  */
 export function updateHabit(data: AppData, habitId: Id, draft: HabitDraft): AppData {
   return {
     ...data,
     habits: data.habits.map((habit) => {
       if (habit.id !== habitId) return habit;
-      const startDate = habit.kind === 'abstain' ? habit.startDate : '';
-      const updated = habitFromDraft(
-        { ...draft, kind: habit.kind },
-        habit.id,
-        habit.createdAt,
-        startDate,
-      );
+      const updated = habitFromDraft({ ...draft, kind: habit.kind }, habit.id, habit.createdAt);
       return { ...updated, archivedAt: habit.archivedAt };
     }),
   };
@@ -230,7 +198,6 @@ export const HABIT_KIND_LABELS: Record<HabitKind, string> = {
   check: 'Да / нет',
   count: 'Количество',
   time: 'Время',
-  abstain: 'Отказ',
 };
 
 export const WEEKDAY_SHORT: Record<Weekday, string> = {
@@ -268,21 +235,15 @@ export function describeSchedule(schedule: Schedule): string {
 
 /**
  * Привычка одной строкой для списков:
- * "20 страниц, каждый день", "45 мин в день, 4 раза в неделю", "чистые дни, 300 ₽ в день".
+ * "20 страниц, каждый день", "45 мин в день, 4 раза в неделю".
  */
-export function describeHabit(draft: HabitDraft, currency: string): string {
-  if (draft.kind === 'abstain') {
-    return draft.costPerDay ? `чистые дни, ${draft.costPerDay} ${currency} в день` : 'чистые дни';
-  }
+export function describeHabit(draft: HabitDraft): string {
   return `${describeTarget(draft)}, ${describeSchedule(draft.schedule)}`;
 }
 
-/** Цель привычки одной строкой: "20 страниц", "45 мин в день", "чистые дни". */
+/** Цель привычки одной строкой: "20 страниц", "45 мин в день", "сделал или нет". */
 export function describeTarget(
-  habit: Pick<
-    HabitDraft,
-    'kind' | 'unit' | 'dailyTarget' | 'targetMinutes' | 'targetPeriod' | 'costPerDay'
-  >,
+  habit: Pick<HabitDraft, 'kind' | 'unit' | 'dailyTarget' | 'targetMinutes' | 'targetPeriod'>,
 ): string {
   switch (habit.kind) {
     case 'check':
@@ -291,7 +252,5 @@ export function describeTarget(
       return `${habit.dailyTarget} ${habit.unit}`;
     case 'time':
       return `${formatMinutes(habit.targetMinutes)} в ${habit.targetPeriod === 'day' ? 'день' : 'неделю'}`;
-    case 'abstain':
-      return 'считаем чистые дни';
   }
 }

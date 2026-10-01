@@ -7,7 +7,7 @@ import { activeScales, getDayEntry } from '../../domain/days';
 import { arcHabitsAll, dayScore, habitDayScore, toIndex } from '../../domain/discipline';
 import { arcHabits } from '../../domain/habits';
 import { dayRequirement, isHabitActiveOn } from '../../domain/schedule';
-import type { AbstainHabit, DateKey } from '../../domain/types';
+import type { DateKey } from '../../domain/types';
 import { BigNumber } from '../../design/ui/BigNumber';
 import { EmptyState } from '../../design/ui/EmptyState';
 import { GlassCard } from '../../design/ui/GlassCard';
@@ -16,7 +16,6 @@ import { RatingPicker } from '../../design/ui/RatingPicker';
 import { ScreenHeader } from '../../design/ui/ScreenHeader';
 import { useToday } from '../../hooks/useToday';
 import { useAppStore } from '../../store/useAppStore';
-import { AbstainDialogs, type AbstainDialog } from '../habits/abstain/AbstainDialogs';
 import { DaySwitcher } from './DaySwitcher';
 import { HabitCheckinRow } from './HabitCheckinRow';
 
@@ -29,7 +28,6 @@ export function CheckinScreen() {
   const arc = getActiveArc(data);
   // Выбранный день; null — «последний доступный» (обычно сегодня).
   const [pickedDate, setPickedDate] = useState<DateKey | null>(null);
-  const [dialog, setDialog] = useState<AbstainDialog>(null);
 
   if (!arc) return null;
 
@@ -65,16 +63,7 @@ export function CheckinScreen() {
   const entry = getDayEntry(data, date);
   const scales = activeScales(data);
 
-  // Отказы открывают «Тягу сейчас» или «Срыв» для своей привычки.
-  const openDialog = (kind: 'craving' | 'relapse') => (habit: AbstainHabit) =>
-    setDialog({ kind, habit });
-  const rowProps = {
-    data,
-    date,
-    isToday: date === today,
-    onCraving: openDialog('craving'),
-    onRelapse: openDialog('relapse'),
-  };
+  const rowProps = { data, date };
 
   return (
     <>
@@ -157,8 +146,6 @@ export function CheckinScreen() {
           </GlassCard>
         )}
       </div>
-
-      <AbstainDialogs dialog={dialog} date={date} today={today} onClose={() => setDialog(null)} />
     </>
   );
 }

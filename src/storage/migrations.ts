@@ -5,9 +5,9 @@ import { CURRENT_VERSION } from './schema';
  * Миграции — как обновить данные старой версии до новой.
  *
  * Ключ — версия, В КОТОРУЮ переводит шаг. Шаг получает данные предыдущей
- * версии и возвращает данные следующей. Пример на будущее:
+ * версии и возвращает данные следующей. Простой пример:
  *
- *   2: (data) => ({ ...data, settings: { ...data.settings, weekStartsOn: 1 } }),
+ *   3: (data) => ({ ...data, settings: { ...data.settings, weekStartsOn: 1 } }),
  *
  * migrate() проходит шаги по порядку: v1 → v2 → v3 … до CURRENT_VERSION.
  * Старые шаги никогда не удаляем и не меняем — по ним обновляются бэкапы.
@@ -17,7 +17,47 @@ import { CURRENT_VERSION } from './schema';
 export type RawData = Record<string, unknown>;
 export type Migration = (data: RawData) => RawData;
 
-export const MIGRATIONS: Record<number, Migration> = {};
+function isObject(value: unknown): value is RawData {
+  return typeof value === 'object' && value !== null && !Array.isArray(value);
+}
+
+/** Массив объектов из сырых данных (не массив → пустой). */
+function objects(value: unknown): RawData[] {
+  return Array.isArray(value) ? value.filter(isObject) : [];
+}
+
+export const MIGRATIONS: Record<number, Migration> = {
+  /**
+   * v1 → v2: убран тип привычки «Отказ» вместе со срывами, тягами
+   * и подсчётом сэкономленных денег (а с ним — валюта в настройках).
+   */
+  2: (data) => {
+    const removed = new Set(
+      objects(data.habits)
+        .filter((habit) => habit.kind === 'abstain')
+        .map((habit) => habit.id),
+    );
+    const habitLogs = isObject(data.habitLogs) ? { ...data.habitLogs } : {};
+    for (const id of removed) delete habitLogs[id as string];
+
+    const { abstainEvents: _events, ...rest } = data;
+    const { currency: _currency, ...settings } = isObject(data.settings) ? data.settings : {};
+
+    return {
+      ...rest,
+      settings,
+      habits: objects(data.habits).filter((habit) => !removed.has(habit.id)),
+      habitLogs,
+      arcs: objects(data.arcs).map((arc) => ({
+        ...arc,
+        habitIds: Array.isArray(arc.habitIds) ? arc.habitIds.filter((id) => !removed.has(id)) : [],
+      })),
+      dashboard: objects(data.dashboard).filter(
+        (widget) => widget.type !== 'moneySaved' && !removed.has(widget.habitId),
+      ),
+    };
+  },
+};
 
 export type MigrationResult =
   | { status: 'current'; data: AppData }
@@ -25,22 +65,9 @@ export type MigrationResult =
   | { status: 'newer'; version: number }
   | { status: 'invalid'; reason: string };
 
-function isObject(value: unknown): value is RawData {
-  return typeof value === 'object' && value !== null && !Array.isArray(value);
-}
-
 /** Грубая проверка формы: все ли разделы на месте и нужного типа. */
 function looksLikeAppData(data: RawData): data is RawData & AppData {
-  const arrays = [
-    'arcs',
-    'habits',
-    'abstainEvents',
-    'ratingScales',
-    'goals',
-    'tasks',
-    'achievements',
-    'dashboard',
-  ];
+  const arrays = ['arcs', 'habits', 'ratingScales', 'goals', 'tasks', 'achievements', 'dashboard'];
   const objects = ['settings', 'habitLogs', 'days', 'weeklyReviews'];
   return (
     arrays.every((key) => Array.isArray(data[key])) &&

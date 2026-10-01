@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { addAbstainEvent } from './abstain';
 import { chartFor, DAILY_WINDOW } from './habitCharts';
 import { setLog } from './progress';
 import { ARC_START, makeData, makeHabit } from './testData';
@@ -43,19 +42,5 @@ describe('данные графиков', () => {
     const chart = chartFor(gym, data, ARC_START, '2026-10-08');
     expect(chart).toMatchObject({ kind: 'weekly', target: 3, unit: 'раз' });
     expect(chart.points.at(-1)).toEqual({ date: '2026-10-05', value: 1, done: false });
-  });
-
-  it('отказ: серия растёт и падает до нуля при срыве', () => {
-    const smoking = makeHabit('smoking', { kind: 'abstain' });
-    const data = addAbstainEvent(makeData([smoking]), {
-      id: 'e',
-      habitId: 'smoking',
-      date: '2026-10-03',
-      type: 'relapse',
-      reason: '',
-      createdAt: '2026-10-03T20:00:00.000Z',
-    });
-    const chart = chartFor(smoking, data, ARC_START, '2026-10-05');
-    expect(chart.points.map((p) => p.value)).toEqual([1, 2, 0, 1, 2]);
   });
 });

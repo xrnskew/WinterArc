@@ -13,7 +13,6 @@ import { StepHeading } from './StepHeading';
 
 interface StepHabitsProps {
   choices: HabitChoice[];
-  currency: string;
   onToggle: (key: string) => void;
   /** key = null — новая своя привычка. */
   onSave: (key: string | null, draft: HabitDraft) => void;
@@ -23,7 +22,7 @@ interface StepHabitsProps {
 type Editing = { key: string | null; draft: HabitDraft } | null;
 
 /** Шаг 3: привычки из прошлой арки, шаблоны и свои. */
-export function StepHabits({ choices, currency, onToggle, onSave }: StepHabitsProps) {
+export function StepHabits({ choices, onToggle, onSave }: StepHabitsProps) {
   const [editing, setEditing] = useState<Editing>(null);
 
   const groups = [
@@ -49,7 +48,6 @@ export function StepHabits({ choices, currency, onToggle, onSave }: StepHabitsPr
                   <HabitChoiceRow
                     key={choice.key}
                     choice={choice}
-                    currency={currency}
                     onToggle={() => onToggle(choice.key)}
                     onEdit={() => setEditing({ key: choice.key, draft: choice.draft })}
                   />
@@ -73,7 +71,6 @@ export function StepHabits({ choices, currency, onToggle, onSave }: StepHabitsPr
         {editing && (
           <HabitForm
             initial={editing.draft}
-            currency={currency}
             submitLabel={editing.key ? 'Сохранить' : 'Добавить привычку'}
             onCancel={() => setEditing(null)}
             onSubmit={(draft) => {
@@ -89,13 +86,12 @@ export function StepHabits({ choices, currency, onToggle, onSave }: StepHabitsPr
 
 interface HabitChoiceRowProps {
   choice: HabitChoice;
-  currency: string;
   onToggle: () => void;
   onEdit: () => void;
 }
 
 /** Строка привычки: вся строка — галочка, справа — карандаш (кроме привычек прошлой арки). */
-function HabitChoiceRow({ choice, currency, onToggle, onEdit }: HabitChoiceRowProps) {
+function HabitChoiceRow({ choice, onToggle, onEdit }: HabitChoiceRowProps) {
   const { draft, selected } = choice;
   const editable = choice.source !== 'kept';
 
@@ -122,7 +118,7 @@ function HabitChoiceRow({ choice, currency, onToggle, onEdit }: HabitChoiceRowPr
           <span className={cx('block truncate text-base', selected ? 'text-number' : 'text-text')}>
             {draft.name}
           </span>
-          <span className="block text-sm text-muted">{describeHabit(draft, currency)}</span>
+          <span className="block text-sm text-muted">{describeHabit(draft)}</span>
         </span>
       </label>
       {editable && (

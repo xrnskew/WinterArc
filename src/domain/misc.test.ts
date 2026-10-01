@@ -1,6 +1,5 @@
 import { describe, expect, it } from 'vitest';
 import { getActiveArc } from './arc';
-import { breathingAt, formatClock } from './breathing';
 import { getDayEntry, setDayNote, setRating } from './days';
 import { addHabit, archiveHabit, arcHabits, draftFromHabit, updateHabit } from './habits';
 import { makeData, makeHabit } from './testData';
@@ -51,23 +50,5 @@ describe('изменения привычек', () => {
     const data = archiveHabit(makeData([water]), 'water', '2026-10-05T10:00:00.000Z');
     expect(arcHabits(data, getActiveArc(data)!)).toEqual([]);
     expect(data.habits).toHaveLength(1);
-  });
-});
-
-describe('дыхание 4-4-6', () => {
-  it('фазы по секундам', () => {
-    expect(breathingAt(0)).toMatchObject({ phase: 'inhale', secondsLeft: 4 });
-    expect(breathingAt(3.9).phase).toBe('inhale');
-    expect(breathingAt(4)).toMatchObject({ phase: 'hold', secondsLeft: 4 });
-    expect(breathingAt(8)).toMatchObject({ phase: 'exhale', secondsLeft: 6 });
-    expect(breathingAt(13.5)).toMatchObject({ phase: 'exhale', secondsLeft: 1 });
-    expect(breathingAt(14).phase).toBe('inhale');
-  });
-
-  it('часы', () => {
-    expect(formatClock(300)).toBe('5:00');
-    expect(formatClock(299.2)).toBe('5:00');
-    expect(formatClock(61)).toBe('1:01');
-    expect(formatClock(-3)).toBe('0:00');
   });
 });

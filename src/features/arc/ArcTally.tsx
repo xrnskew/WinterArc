@@ -9,23 +9,21 @@ interface ArcTallyProps {
   today: DateKey;
   label: string;
   /**
-   * Индекс и срывы по дням (domain/discipline.ts → arcDayMarks).
+   * Индекс дисциплины по дням (domain/discipline.ts → arcDayMarks).
    * Без них — просто лента дней (например, превью в онбординге).
    */
   marks?: ArcDayMark[];
 }
 
-/** Зарубки арки: прошедшие дни светлеют по индексу дисциплины, срыв — красный. */
+/** Зарубки арки: прошедшие дни светлеют по индексу дисциплины, сегодня светится. */
 export function ArcTally({ arc, today, label, marks }: ArcTallyProps) {
   const days = useMemo<TallyDay[]>(() => {
-    const source =
-      marks ?? arcDays(arc, today).map((day) => ({ ...day, score: null, relapse: false }));
+    const source = marks ?? arcDays(arc, today).map((day) => ({ ...day, score: null }));
     return source.map((day) => ({
       key: day.date,
       weekday: day.weekday,
       status: day.status,
       score: day.score,
-      relapse: day.relapse,
     }));
   }, [arc, today, marks]);
 

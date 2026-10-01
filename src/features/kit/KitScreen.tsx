@@ -77,8 +77,7 @@ function Typography() {
         </div>
         <div>
           <p className="text-base text-text">
-            Каждый день считается чистым, пока ты не отметишь срыв. Тягу, которую ты пережил,
-            приложение тоже запоминает.
+            Отмечай привычки каждый вечер: чем ровнее неделя, тем светлее зарубки на главном экране.
           </p>
           <p className="mt-1 text-xs text-muted">Golos Text 400 — основной текст</p>
         </div>
@@ -136,7 +135,9 @@ function Colors() {
         </div>
         <div className="mt-4 flex items-center gap-3">
           <span className="h-6 w-1 bg-danger" />
-          <span className="text-sm text-danger-text">Срыв или просрочка — единственный цвет</span>
+          <span className="text-sm text-danger-text">
+            Просроченные задачи и дедлайны — единственный цвет
+          </span>
         </div>
       </GlassCard>
     </Section>
@@ -209,7 +210,6 @@ function Controls() {
           <div className="flex flex-wrap gap-3">
             <Button variant="primary">Сохранить</Button>
             <Button>Отмена</Button>
-            <Button variant="danger">Отметить срыв</Button>
             <Button variant="ghost">Пропустить</Button>
           </div>
         </GlassCard>

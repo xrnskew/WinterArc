@@ -22,7 +22,7 @@ function MobileBar() {
       aria-label="Основная навигация"
       className="glass fixed inset-x-0 bottom-0 z-20 rounded-none border-x-0 border-b-0 pb-[env(safe-area-inset-bottom)] md:hidden"
     >
-      <ul className="mx-auto grid h-16 max-w-xl grid-cols-5">
+      <ul className="mx-auto grid h-(--wa-nav-height) max-w-xl grid-cols-5">
         {MOBILE_BAR.left.map((item) => (
           <li key={item.to}>
             <BarLink item={item} />
@@ -83,7 +83,7 @@ function CheckinButton() {
         <>
           <span
             className={cx(
-              'absolute -top-5 left-1/2 flex size-13 -translate-x-1/2 items-center justify-center rounded-md bg-number text-night',
+              'absolute -top-(--wa-nav-raise) left-1/2 flex size-13 -translate-x-1/2 items-center justify-center rounded-md bg-number text-night',
               'transition-shadow duration-(--wa-motion-base)',
               isActive ? 'shadow-glow-strong' : 'shadow-glow',
             )}

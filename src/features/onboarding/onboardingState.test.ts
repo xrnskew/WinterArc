@@ -69,7 +69,6 @@ describe('онбординг', () => {
       { ...EMPTY_HABIT_DRAFT, name: 'Зарядка' },
       'habit-1',
       '2026-10-01T08:00:00.000Z',
-      TODAY,
     );
     const state = initOnboarding('2027-01-02', [old]);
     expect(selectedHabits(state)).toEqual({ newHabits: [], keptHabitIds: ['habit-1'] });
@@ -80,7 +79,6 @@ describe('онбординг', () => {
       { ...EMPTY_HABIT_DRAFT, name: 'чтение ' },
       'habit-2',
       '2026-10-01T08:00:00.000Z',
-      TODAY,
     );
     const state = initOnboarding('2027-01-02', [reading]);
     const names = state.choices.map((c) => `${c.source}:${c.draft.name.trim()}`);

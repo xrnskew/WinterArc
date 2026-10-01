@@ -1,15 +1,16 @@
+import { CircleAlert } from 'lucide-react';
 import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react';
 import { cx } from '../../lib/cx';
 import { describedBy } from './describedBy';
 
 /**
  * Поля ввода. Шрифт 16px — меньше нельзя: iPhone начнёт приближать страницу.
- * Ошибка подсвечивается красной рамкой через aria-invalid.
+ * Ошибка подсвечивается белой рамкой через aria-invalid (красный — только для просрочки).
  */
 const FIELD_CLASS = cx(
   'w-full rounded-md border border-gray-700 bg-night/70 text-base text-text',
   'placeholder:text-muted transition-colors duration-(--wa-motion-fast)',
-  'focus:border-number focus:outline-none aria-invalid:border-danger',
+  'focus:border-number focus:outline-none aria-invalid:border-number',
 );
 
 export function TextInput({ className, ...rest }: InputHTMLAttributes<HTMLInputElement>) {
@@ -73,9 +74,7 @@ export function Field({ id, label, hint, error, children, className }: FieldProp
       </label>
       {children}
       {error ? (
-        <p id={describedBy(id)} className="mt-1.5 text-sm text-danger-text">
-          {error}
-        </p>
+        <FieldError id={describedBy(id)}>{error}</FieldError>
       ) : (
         hint && (
           <p id={describedBy(id)} className="mt-1.5 text-sm text-muted">
@@ -84,5 +83,18 @@ export function Field({ id, label, hint, error, children, className }: FieldProp
         )
       )}
     </div>
+  );
+}
+
+/**
+ * Ошибка под полем: белый текст со значком «!».
+ * Красным не выделяем — красный в приложении только для просроченного.
+ */
+export function FieldError({ id, children }: { id?: string; children: ReactNode }) {
+  return (
+    <p id={id} role="alert" className="mt-1.5 flex items-start gap-1.5 text-sm text-number">
+      <CircleAlert size={16} strokeWidth={1.5} className="mt-0.5 shrink-0" aria-hidden="true" />
+      {children}
+    </p>
   );
 }

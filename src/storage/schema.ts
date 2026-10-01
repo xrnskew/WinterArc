@@ -5,13 +5,12 @@ import { newId as defaultNewId } from '../lib/id';
  * Текущая версия формы данных. Поднимай её на 1, когда меняешь типы
  * в domain/types.ts, и добавляй шаг в migrations.ts.
  */
-export const CURRENT_VERSION = 1;
+export const CURRENT_VERSION = 2;
 
 export const DEFAULT_SETTINGS: Settings = {
   themeId: 'winter',
   snow: 'snow',
   performance: 'auto',
-  currency: '₽',
 };
 
 /** Шкалы оценок дня по умолчанию — пользователь может их поменять. */
@@ -32,7 +31,6 @@ export function createEmptyData(newId: () => string = defaultNewId): AppData {
     arcs: [],
     habits: [],
     habitLogs: {},
-    abstainEvents: [],
     ratingScales: defaultRatingScales(newId),
     days: {},
     goals: [],

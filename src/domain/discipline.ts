@@ -1,4 +1,3 @@
-import { hasRelapseOn, isCleanDay } from './abstain';
 import { arcDays } from './arc';
 import { daysBetween } from './dates';
 import { dayCompletion, weekProgress } from './progress';
@@ -9,8 +8,7 @@ import type { AppData, Arc, DateKey, Habit, Weekday } from './types';
  * Индекс дисциплины 0–100.
  *
  * Каждая привычка даёт за день оценку 0…1:
- *   да/нет → 0 или 1; количество и время → min(факт / цель, 1);
- *   отказ → 1, если день чистый.
+ *   да/нет → 0 или 1; количество и время → min(факт / цель, 1).
  * Индекс дня — среднее по привычкам, запланированным на этот день.
  * Гибкие привычки («N раз в неделю», недельная цель по времени) в индекс дня
  * не входят — только в индекс недели, как min(сделано / цель, 1).
@@ -24,7 +22,6 @@ export function arcHabitsAll(data: AppData, arc: Arc): Habit[] {
 /** Оценка привычки за день 0…1. null — день не по плану или привычки ещё не было. */
 export function habitDayScore(habit: Habit, data: AppData, date: DateKey): number | null {
   if (!isHabitActiveOn(habit, date)) return null;
-  if (habit.kind === 'abstain') return isCleanDay(habit, data, date) ? 1 : 0;
   if (dayRequirement(habit, date) !== 'required') return null;
   return dayCompletion(habit, data.habitLogs, date);
 }
@@ -88,18 +85,13 @@ export interface ArcDayMark {
   status: 'past' | 'today' | 'future';
   /** Индекс дня 0…1; null — ничего не было запланировано (или день в будущем). */
   score: number | null;
-  /** Срыв по любой привычке-отказу. */
-  relapse: boolean;
 }
 
-/** Все дни арки с индексом и срывами — для зарубок. */
+/** Все дни арки с индексом дисциплины — для зарубок. */
 export function arcDayMarks(data: AppData, arc: Arc, today: DateKey): ArcDayMark[] {
   const habits = arcHabitsAll(data, arc);
-  const abstainIds = habits.filter((habit) => habit.kind === 'abstain').map((habit) => habit.id);
-
   return arcDays(arc, today).map((day) => ({
     ...day,
     score: day.status === 'future' ? null : dayScore(habits, data, day.date),
-    relapse: day.status !== 'future' && abstainIds.some((id) => hasRelapseOn(data, id, day.date)),
   }));
 }

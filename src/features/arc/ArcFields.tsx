@@ -1,7 +1,7 @@
 import { useId } from 'react';
 import type { ArcDraft, ArcDraftErrors } from '../../domain/arc';
 import { describedBy } from '../../design/ui/describedBy';
-import { DateInput, Field, TextArea, TextInput } from '../../design/ui/inputs';
+import { DateInput, Field, FieldError, TextArea, TextInput } from '../../design/ui/inputs';
 
 interface ArcFieldsProps {
   draft: ArcDraft;
@@ -50,11 +50,7 @@ export function ArcFields({ draft, onChange, errors, withWhy = false }: ArcField
             />
           </Field>
         </div>
-        {errors.dates && (
-          <p id={`${id}-dates-error`} className="mt-1.5 text-sm text-danger-text">
-            {errors.dates}
-          </p>
-        )}
+        {errors.dates && <FieldError id={`${id}-dates-error`}>{errors.dates}</FieldError>}
       </div>
 
       {withWhy && (

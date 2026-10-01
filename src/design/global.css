@@ -71,6 +71,19 @@
 }
 
 @layer base {
+  /*
+   * Размеры нижнего бара навигации (телефон). Нужны и самому бару,
+   * и отступу контента снизу — поэтому в одном месте.
+   */
+  :root {
+    --wa-nav-height: 4rem; /* высота бара */
+    --wa-nav-raise: 1.25rem; /* на сколько кнопка «Чек-ин» выступает над баром */
+    /* Отступ контента: бар + выступ + вырез экрана снизу + запас, чтобы не прилипало. */
+    --wa-nav-clearance: calc(
+      var(--wa-nav-height) + var(--wa-nav-raise) + env(safe-area-inset-bottom) + 1.5rem
+    );
+  }
+
   html {
     background: var(--wa-color-night);
     color: var(--wa-color-text);
@@ -183,32 +196,6 @@
     overflow: hidden;
   }
 
-  /* Полноэкранный режим (тяга сейчас): только дыхание, без экрана под ним. */
-  .wa-fullscreen {
-    width: 100%;
-    max-width: none;
-    height: 100dvh;
-    max-height: none;
-    margin: 0;
-    padding: 0;
-    color: var(--wa-color-text);
-    background: var(--wa-color-night);
-    border: none;
-  }
-
-  .wa-fullscreen::backdrop {
-    background: transparent;
-  }
-
-  html:has(.wa-fullscreen[open]) {
-    overflow: hidden;
-  }
-
-  /* Квадрат дыхания 4-4-6: вдох 4 с, задержка 4 с, выдох 6 с. */
-  .wa-breathe {
-    animation: wa-breathe 14s ease-in-out infinite;
-  }
-
   /* Ползунок: тонкая серая дорожка и белый квадратный бегунок. */
   .wa-range {
     appearance: none;
@@ -272,21 +259,6 @@
   }
   to {
     opacity: 0;
-  }
-}
-
-@keyframes wa-breathe {
-  0% {
-    transform: scale(0.55);
-  }
-  28.57% {
-    transform: scale(1);
-  }
-  57.14% {
-    transform: scale(1);
-  }
-  100% {
-    transform: scale(0.55);
   }
 }
 

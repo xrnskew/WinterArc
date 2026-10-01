@@ -3,7 +3,7 @@ import { HABIT_KIND_LABELS, validateHabitDraft, type HabitDraft } from '../../do
 import type { HabitKind, Schedule, Weekday } from '../../domain/types';
 import { Button } from '../../design/ui/Button';
 import { describedBy } from '../../design/ui/describedBy';
-import { Field, NumberInput, TextInput } from '../../design/ui/inputs';
+import { Field, FieldError, NumberInput, TextInput } from '../../design/ui/inputs';
 import { AccentPicker, IconPicker, WeekdayPicker } from '../../design/ui/pickers';
 import { Segmented } from '../../design/ui/Segmented';
 import { cx } from '../../lib/cx';
@@ -13,7 +13,6 @@ interface HabitFormProps {
   initial: HabitDraft;
   /** Текст главной кнопки: «Добавить привычку», «Сохранить». */
   submitLabel: string;
-  currency: string;
   /** Тип менять нельзя (правка существующей привычки: история записана в его формате). */
   lockKind?: boolean;
   onSubmit: (draft: HabitDraft) => void;
@@ -22,9 +21,8 @@ interface HabitFormProps {
 
 const KIND_HINTS: Record<HabitKind, string> = {
   check: 'сделал или нет',
-  count: 'страницы, стаканы, подходы',
-  time: 'минуты учёбы, спорта',
-  abstain: 'серия чистых дней',
+  count: 'страницы, стаканы',
+  time: 'минуты в день или неделю',
 };
 
 const KINDS = Object.keys(HABIT_KIND_LABELS) as HabitKind[];
@@ -47,11 +45,10 @@ function buildSchedule(type: ScheduleType, weekdays: Weekday[], times: number): 
 const toNumber = (value: number | null) => value ?? NaN;
 const fromNumber = (value: number) => (Number.isNaN(value) ? null : value);
 
-/** Форма привычки всех четырёх типов. Ничего не сохраняет сама — отдаёт черновик наверх. */
+/** Форма привычки всех трёх типов. Ничего не сохраняет сама — отдаёт черновик наверх. */
 export function HabitForm({
   initial,
   submitLabel,
-  currency,
   lockKind = false,
   onSubmit,
   onCancel,
@@ -104,7 +101,7 @@ export function HabitForm({
       ) : (
         <fieldset>
           <legend className="mb-1.5 text-sm text-text">Тип</legend>
-          <div className="grid grid-cols-2 gap-2">
+          <div className="grid grid-cols-3 gap-2">
             {KINDS.map((kind) => (
               <label key={kind}>
                 <input
@@ -182,50 +179,26 @@ export function HabitForm({
         </div>
       )}
 
-      {draft.kind === 'abstain' && (
-        <Field
-          id={`${id}-cost`}
-          label={`Сколько тратил в день, ${currency}`}
-          hint="Посчитаем, сколько сэкономишь. Можно оставить пустым."
-          error={errors.cost}
-        >
-          <NumberInput
-            id={`${id}-cost`}
-            min={0}
-            value={draft.costPerDay}
-            onChange={(costPerDay) => update({ costPerDay })}
-            aria-invalid={Boolean(errors.cost)}
-            aria-describedby={describedBy(`${id}-cost`)}
+      <div className="flex flex-col gap-3">
+        <span className="text-sm text-text">Расписание</span>
+        <Segmented
+          label="Расписание"
+          value={draft.schedule.type}
+          onChange={(type) => update({ schedule: buildSchedule(type, weekdays, times) })}
+          options={SCHEDULE_OPTIONS}
+        />
+        {draft.schedule.type === 'weekdays' && (
+          <WeekdayPicker
+            value={weekdays}
+            onChange={setWeekdays}
+            invalid={Boolean(errors.schedule)}
           />
-        </Field>
-      )}
-
-      {draft.kind === 'abstain' ? (
-        <p className="text-sm text-muted">
-          Отказ действует каждый день. День считается чистым, пока ты не отметишь срыв.
-        </p>
-      ) : (
-        <div className="flex flex-col gap-3">
-          <span className="text-sm text-text">Расписание</span>
-          <Segmented
-            label="Расписание"
-            value={draft.schedule.type}
-            onChange={(type) => update({ schedule: buildSchedule(type, weekdays, times) })}
-            options={SCHEDULE_OPTIONS}
-          />
-          {draft.schedule.type === 'weekdays' && (
-            <WeekdayPicker
-              value={weekdays}
-              onChange={setWeekdays}
-              invalid={Boolean(errors.schedule)}
-            />
-          )}
-          {draft.schedule.type === 'timesPerWeek' && (
-            <TimesPicker value={times} onChange={setTimes} />
-          )}
-          {errors.schedule && <p className="text-sm text-danger-text">{errors.schedule}</p>}
-        </div>
-      )}
+        )}
+        {draft.schedule.type === 'timesPerWeek' && (
+          <TimesPicker value={times} onChange={setTimes} />
+        )}
+        {errors.schedule && <FieldError>{errors.schedule}</FieldError>}
+      </div>
 
       <IconPicker value={draft.icon} onChange={(icon) => update({ icon })} />
       <AccentPicker value={draft.accent} onChange={(accent) => update({ accent })} />

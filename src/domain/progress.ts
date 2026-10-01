@@ -5,7 +5,6 @@ import type { AppData, DateKey, Habit, HabitLogs, Id } from './types';
 /**
  * Выполнение привычек «да/нет», «количество» и «время»:
  * записи по дням, выполнение дня и недели, серии, итоги.
- * Отказы считаются отдельно — в abstain.ts.
  */
 
 // ── Записи ───────────────────────────────────────────────
@@ -37,8 +36,6 @@ export function dailyTarget(habit: Habit): number | null {
       return habit.dailyTarget;
     case 'time':
       return habit.targetPeriod === 'day' ? habit.targetMinutes : null;
-    case 'abstain':
-      return null;
   }
 }
 

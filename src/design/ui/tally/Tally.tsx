@@ -9,8 +9,6 @@ export interface TallyDay {
   status: 'past' | 'today' | 'future';
   /** Индекс дисциплины дня 0…1; null — данных нет. */
   score: number | null;
-  /** В этот день был срыв — черта красная. */
-  relapse: boolean;
 }
 
 interface TallyProps {
@@ -36,7 +34,7 @@ function pastColor(score: number | null): string {
 /**
  * «Зарубки» — вся арка одной лентой: каждый день — вертикальная черта,
  * как счёт дней на стене. Прошедшие светлеют по индексу дисциплины,
- * срыв — красный, сегодня — выше и со свечением, будущие — короткие риски.
+ * сегодня — выше и со свечением, будущие — короткие риски.
  */
 export function Tally({ days, label, todayCaption, minUnitPx = MIN_UNIT_PX }: TallyProps) {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -112,7 +110,7 @@ export function Tally({ days, label, todayCaption, minUnitPx = MIN_UNIT_PX }: Ta
                 y={baseline - ROW_HEIGHT}
                 width={layout.tickWidth}
                 height={ROW_HEIGHT}
-                style={{ fill: day.relapse ? 'var(--wa-color-danger)' : pastColor(day.score) }}
+                style={{ fill: pastColor(day.score) }}
               />
             );
           })}

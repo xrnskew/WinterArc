@@ -1,5 +1,4 @@
 import { describe, expect, it } from 'vitest';
-import { addAbstainEvent } from './abstain';
 import { arcDayMarks, dayScore, habitWeekScore, toIndex, weekScore } from './discipline';
 import { getActiveArc } from './arc';
 import { setLog } from './progress';
@@ -8,8 +7,7 @@ import { makeData, makeHabit } from './testData';
 const check = makeHabit('check', { kind: 'check' });
 const reading = makeHabit('reading', { kind: 'count', unit: 'страниц', dailyTarget: 20 });
 const gym = makeHabit('gym', { kind: 'check', schedule: { type: 'timesPerWeek', times: 4 } });
-const smoking = makeHabit('smoking', { kind: 'abstain' });
-const habits = [check, reading, gym, smoking];
+const habits = [check, reading, gym];
 
 describe('индекс дисциплины', () => {
   it('индекс дня — среднее по запланированным, гибкие не входят', () => {
@@ -17,22 +15,13 @@ describe('индекс дисциплины', () => {
     data = setLog(data, 'check', '2026-10-01', 1);
     data = setLog(data, 'reading', '2026-10-01', 10);
     data = setLog(data, 'gym', '2026-10-01', 1);
-    // check 1, reading 0.5, smoking 1 (чистый) → 2.5 / 3
-    expect(dayScore(habits, data, '2026-10-01')).toBeCloseTo(2.5 / 3);
-    expect(toIndex(dayScore(habits, data, '2026-10-01'))).toBe(83);
+    // check 1, reading 0.5; gym гибкая — не входит → 1.5 / 2
+    expect(dayScore(habits, data, '2026-10-01')).toBeCloseTo(0.75);
+    expect(toIndex(dayScore(habits, data, '2026-10-01'))).toBe(75);
   });
 
-  it('срыв даёт отказу 0 за день', () => {
-    let data = makeData([smoking]);
-    data = addAbstainEvent(data, {
-      id: 'e',
-      habitId: 'smoking',
-      date: '2026-10-02',
-      type: 'relapse',
-      reason: '',
-      createdAt: '2026-10-02T20:00:00.000Z',
-    });
-    expect(dayScore([smoking], data, '2026-10-02')).toBe(0);
+  it('ничего не отмечено — индекс 0, а не «нет данных»', () => {
+    expect(dayScore([check, reading], makeData([check, reading]), '2026-10-02')).toBe(0);
   });
 
   it('до создания привычки дней нет', () => {
@@ -66,21 +55,15 @@ describe('индекс дисциплины', () => {
     expect(weekScore([check, gym], data, '2026-10-05', '2026-10-11')).toBe(0.5);
   });
 
-  it('зарубки: индекс прошлых дней, срывы, будущее без оценки', () => {
-    let data = makeData([check, smoking]);
+  it('зарубки: индекс прошлых дней, будущее без оценки', () => {
+    let data = makeData([check, reading]);
     data = setLog(data, 'check', '2026-10-01', 1);
-    data = addAbstainEvent(data, {
-      id: 'e',
-      habitId: 'smoking',
-      date: '2026-10-02',
-      type: 'relapse',
-      reason: '',
-      createdAt: '2026-10-02T20:00:00.000Z',
-    });
+    data = setLog(data, 'reading', '2026-10-01', 20);
     const marks = arcDayMarks(data, getActiveArc(data)!, '2026-10-03');
-    expect(marks[0]).toMatchObject({ status: 'past', score: 1, relapse: false });
-    expect(marks[1]).toMatchObject({ status: 'past', score: 0, relapse: true });
+    expect(marks[0]).toMatchObject({ status: 'past', score: 1 });
+    expect(marks[1]).toMatchObject({ status: 'past', score: 0 });
     expect(marks[2].status).toBe('today');
-    expect(marks[3]).toMatchObject({ status: 'future', score: null, relapse: false });
+    expect(marks[3]).toMatchObject({ status: 'future', score: null });
+    expect(marks[0]).not.toHaveProperty('relapse');
   });
 });

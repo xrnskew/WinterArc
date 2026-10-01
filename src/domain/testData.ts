@@ -15,7 +15,7 @@ let counter = 0;
 const testId = () => `test-${++counter}`;
 
 export function makeHabit(id: string, patch: Partial<HabitDraft>): Habit {
-  return habitFromDraft({ ...EMPTY_HABIT_DRAFT, name: id, ...patch }, id, CREATED, ARC_START);
+  return habitFromDraft({ ...EMPTY_HABIT_DRAFT, name: id, ...patch }, id, CREATED);
 }
 
 /** Данные с аркой 1 октября – 31 декабря 2026 и переданными привычками. */

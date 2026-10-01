@@ -1,13 +1,11 @@
 import { create } from 'zustand';
-import { addAbstainEvent, removeAbstainEvent } from '../domain/abstain';
 import {
   archiveActiveArc,
-  getActiveArc,
   startArc as startArcInData,
   updateArc as updateArcInData,
   type ArcDraft,
 } from '../domain/arc';
-import { daysBetween, nowTimestamp, todayKey } from '../domain/dates';
+import { nowTimestamp } from '../domain/dates';
 import { setDayNote as setDayNoteInData, setRating as setRatingInData } from '../domain/days';
 import {
   addHabit as addHabitToData,
@@ -17,7 +15,7 @@ import {
   type HabitDraft,
 } from '../domain/habits';
 import { setLog } from '../domain/progress';
-import type { AbstainEvent, AppData, DateKey, Id, Settings } from '../domain/types';
+import type { AppData, DateKey, Id, Settings } from '../domain/types';
 import { newId } from '../lib/id';
 import { loadData, openBrowserStorage, saveData, type LoadResult } from '../storage/localStore';
 
@@ -65,9 +63,6 @@ interface AppState {
   archiveHabit: (habitId: Id) => void;
   /** Значение привычки за день: 1/0, штуки, минуты. */
   setHabitLog: (habitId: Id, date: DateKey, value: number) => void;
-  /** Срыв или пережитая тяга у привычки-отказа. */
-  addAbstainEvent: (habitId: Id, date: DateKey, type: AbstainEvent['type'], reason: string) => void;
-  removeAbstainEvent: (eventId: Id) => void;
   setRating: (date: DateKey, scaleId: Id, value: number | null) => void;
   setDayNote: (date: DateKey, note: string) => void;
 
@@ -105,10 +100,7 @@ export const useAppStore = create<AppState>((set) => {
 
     startArc: ({ draft, newHabits, keptHabitIds }) => {
       const now = nowTimestamp();
-      // Чистые дни отказа считаем с начала арки.
-      const habits = newHabits.map((habitDraft) =>
-        habitFromDraft(habitDraft, newId(), now, draft.startDate),
-      );
+      const habits = newHabits.map((habitDraft) => habitFromDraft(habitDraft, newId(), now));
       change((data) =>
         startArcInData(data, { draft, newHabits: habits, keptHabitIds }, newId(), now),
       );
@@ -119,34 +111,13 @@ export const useAppStore = create<AppState>((set) => {
     archiveArc: () => change((data) => archiveActiveArc(data, nowTimestamp())),
 
     addHabit: (draft) =>
-      change((data) => {
-        // Чистые дни нового отказа считаем с сегодня, а если арка ещё не началась — с её старта.
-        const today = todayKey();
-        const arc = getActiveArc(data);
-        const startDate = arc && daysBetween(today, arc.startDate) > 0 ? arc.startDate : today;
-        const habit = habitFromDraft(draft, newId(), nowTimestamp(), startDate);
-        return addHabitToData(data, habit);
-      }),
+      change((data) => addHabitToData(data, habitFromDraft(draft, newId(), nowTimestamp()))),
 
     updateHabit: (habitId, draft) => change((data) => updateHabitInData(data, habitId, draft)),
 
     archiveHabit: (habitId) => change((data) => archiveHabitInData(data, habitId, nowTimestamp())),
 
     setHabitLog: (habitId, date, value) => change((data) => setLog(data, habitId, date, value)),
-
-    addAbstainEvent: (habitId, date, type, reason) =>
-      change((data) =>
-        addAbstainEvent(data, {
-          id: newId(),
-          habitId,
-          date,
-          type,
-          reason: reason.trim(),
-          createdAt: nowTimestamp(),
-        }),
-      ),
-
-    removeAbstainEvent: (eventId) => change((data) => removeAbstainEvent(data, eventId)),
 
     setRating: (date, scaleId, value) =>
       change((data) => setRatingInData(data, date, scaleId, value)),

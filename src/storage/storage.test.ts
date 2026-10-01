@@ -134,3 +134,55 @@ describe('бэкап', () => {
     expect(notOurs.ok).toBe(false);
   });
 });
+
+describe('миграция v1 → v2: тип «Отказ» убран', () => {
+  const v1 = {
+    ...createEmptyData(),
+    version: 1,
+    settings: { themeId: 'winter', snow: 'snow', performance: 'auto', currency: '₽' },
+    activeArcId: 'arc',
+    arcs: [
+      {
+        id: 'arc',
+        name: 'Winter Arc 2026',
+        why: '',
+        startDate: '2026-10-01',
+        endDate: '2026-12-31',
+        habitIds: ['read', 'smoke'],
+        createdAt: '2026-10-01T08:00:00.000Z',
+        archivedAt: null,
+      },
+    ],
+    habits: [
+      { id: 'read', kind: 'check', name: 'Чтение' },
+      { id: 'smoke', kind: 'abstain', name: 'Не курить', startDate: '2026-10-01', costPerDay: 300 },
+    ],
+    habitLogs: { read: { '2026-10-01': 1 }, smoke: {} },
+    abstainEvents: [{ id: 'e1', habitId: 'smoke', date: '2026-10-02', type: 'relapse' }],
+    dashboard: [
+      { id: 'w1', type: 'moneySaved', size: 'half', habitId: 'smoke' },
+      { id: 'w2', type: 'countdown', size: 'full' },
+    ],
+  };
+
+  it('отказы, их события и записи удаляются, остальное остаётся', () => {
+    const result = migrate(v1);
+    expect(result.status).toBe('migrated');
+    if (result.status !== 'migrated') return;
+    const data = result.data as unknown as Record<string, unknown>;
+    expect(data.version).toBe(2);
+    expect(result.data.habits.map((h) => h.id)).toEqual(['read']);
+    expect(result.data.arcs[0].habitIds).toEqual(['read']);
+    expect(result.data.habitLogs).toEqual({ read: { '2026-10-01': 1 } });
+    expect(data).not.toHaveProperty('abstainEvents');
+    expect(result.data.settings).not.toHaveProperty('currency');
+    expect(result.data.dashboard.map((w) => w.id)).toEqual(['w2']);
+  });
+
+  it('при загрузке старые данные сохраняются копией в winterarc:backup:v1', () => {
+    const storage = fakeStorage({ [STORAGE_KEY]: JSON.stringify(v1) });
+    const loaded = loadData(storage, NOW);
+    expect(loaded.status).toBe('migrated');
+    expect(storage.map.get(backupKey(1))).toBe(JSON.stringify(v1));
+  });
+});

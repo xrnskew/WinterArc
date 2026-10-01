@@ -13,7 +13,6 @@ const weekdaysCheck = makeHabit('weekdays', {
 const reading = makeHabit('reading', { kind: 'count', unit: 'страниц', dailyTarget: 20 });
 const gym = makeHabit('gym', { kind: 'check', schedule: { type: 'timesPerWeek', times: 3 } });
 const study = makeHabit('study', { kind: 'time', targetMinutes: 180, targetPeriod: 'week' });
-const smoking = makeHabit('smoking', { kind: 'abstain' });
 
 /** Отметить привычку выполненной в перечисленные дни. */
 function logDays(data: AppData, habitId: string, days: string[], value = 1): AppData {
@@ -30,10 +29,6 @@ describe('расписание', () => {
     expect(isWeeklyHabit(gym)).toBe(true);
     expect(isWeeklyHabit(study)).toBe(true);
     expect(dayRequirement(gym, '2026-10-03')).toBe('flexible');
-  });
-
-  it('отказ нужен каждый день', () => {
-    expect(dayRequirement(smoking, '2026-10-03')).toBe('required');
   });
 
   it('привычка активна с даты создания и до архива', () => {

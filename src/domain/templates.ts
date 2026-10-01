@@ -62,32 +62,6 @@ export const HABIT_TEMPLATES: HabitTemplate[] = [
     icon: 'shower-head',
     accent: 'smoke',
   }),
-  template('no-sugar', {
-    name: 'Без сладкого',
-    kind: 'abstain',
-    icon: 'candy',
-    accent: 'frost',
-  }),
-  template('no-social', {
-    name: 'Без соцсетей',
-    kind: 'abstain',
-    icon: 'smartphone',
-    accent: 'silver',
-  }),
-  template('no-smoking', {
-    name: 'Не курить',
-    kind: 'abstain',
-    icon: 'cigarette',
-    accent: 'steel',
-    costPerDay: 300,
-  }),
-  template('no-alcohol', {
-    name: 'Без алкоголя',
-    kind: 'abstain',
-    icon: 'wine',
-    accent: 'ash',
-    costPerDay: 400,
-  }),
 ];
 
 /** Сколько привычек советуем взять в первую арку. */

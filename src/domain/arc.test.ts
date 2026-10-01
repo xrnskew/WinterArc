@@ -133,7 +133,6 @@ describe('изменения данных', () => {
     { ...EMPTY_HABIT_DRAFT, name: 'Чтение', kind: 'count', unit: 'страниц', dailyTarget: 20 },
     'habit-reading',
     NOW,
-    winter.startDate,
   );
 
   it('startArc создаёт арку, добавляет привычки и делает арку текущей', () => {

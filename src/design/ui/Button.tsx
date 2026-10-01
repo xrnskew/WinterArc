@@ -1,7 +1,7 @@
 import type { ButtonHTMLAttributes } from 'react';
 import { cx } from '../../lib/cx';
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger';
+type Variant = 'primary' | 'secondary' | 'ghost';
 type Size = 'md' | 'lg';
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -14,7 +14,6 @@ const VARIANTS: Record<Variant, string> = {
   primary: 'bg-number text-night hover:shadow-glow',
   secondary: 'glass text-text hover:border-gray-500',
   ghost: 'text-muted hover:text-text',
-  danger: 'border border-danger text-danger-text hover:bg-danger-soft',
 };
 
 const SIZES: Record<Size, string> = {

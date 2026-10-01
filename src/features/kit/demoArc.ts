@@ -24,7 +24,6 @@ export function makeDemoArc(todayIndex = 39): TallyDay[] {
       weekday: ((date.getDay() + 6) % 7) + 1, // getDay: 0 = вс → наш 7
       status,
       score: status === 'past' ? Math.min(1, between(random, 0.3, 1.2)) : null,
-      relapse: status === 'past' && (i === 12 || i === 27),
     };
   });
 }

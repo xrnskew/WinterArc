@@ -13,13 +13,11 @@ export type DayRequirement = 'required' | 'flexible' | 'off';
 
 /** Привычка считается по неделям, а не по дням. */
 export function isWeeklyHabit(habit: Habit): boolean {
-  if (habit.kind === 'abstain') return false;
   if (habit.kind === 'time' && habit.targetPeriod === 'week') return true;
   return habit.schedule.type === 'timesPerWeek';
 }
 
 export function dayRequirement(habit: Habit, date: DateKey): DayRequirement {
-  if (habit.kind === 'abstain') return 'required';
   if (isWeeklyHabit(habit)) return 'flexible';
   if (habit.schedule.type === 'weekdays') {
     return habit.schedule.days.includes(weekdayOf(date)) ? 'required' : 'off';
@@ -27,9 +25,8 @@ export function dayRequirement(habit: Habit, date: DateKey): DayRequirement {
   return 'required';
 }
 
-/** С какого дня привычка существует: дата создания, у отказа — дата начала отсчёта. */
+/** С какого дня привычка существует: дата создания. */
 export function habitStartDate(habit: Habit): DateKey {
-  if (habit.kind === 'abstain') return habit.startDate;
   return toDateKey(new Date(habit.createdAt));
 }
 

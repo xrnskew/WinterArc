@@ -1,15 +1,14 @@
-import { isCleanDay } from './abstain';
 import { addDays, daysBetween, eachDay, weekStart } from './dates';
 import { dailyTarget, getLog, isDayDone, weekProgress } from './progress';
 import { dayRequirement, daysOfWeek, habitStartDate, isWeeklyHabit } from './schedule';
-import type { AbstainHabit, AppData, DateKey, Habit, HabitLogs } from './types';
+import type { AppData, DateKey, Habit, HabitLogs } from './types';
 
 /**
  * Данные для графиков на странице привычки. Только числа — как рисовать,
  * решает интерфейс (features/habits/HabitChart.tsx).
  */
 
-export type HabitChartKind = 'daily' | 'weekly' | 'weeklyRate' | 'cleanStreak';
+export type HabitChartKind = 'daily' | 'weekly' | 'weeklyRate';
 
 export interface ChartPoint {
   /** День или понедельник недели. */
@@ -35,8 +34,7 @@ export const DAILY_WINDOW = 28;
  * Какой график подходит привычке:
  * количество и время с дневной целью — столбцы по дням с линией цели;
  * недельные — столбцы по неделям с линией цели;
- * «да/нет» каждый день — процент выполнения по неделям;
- * отказ — как росла серия чистых дней.
+ * «да/нет» каждый день — процент выполнения по неделям.
  */
 export function chartFor(
   habit: Habit,
@@ -45,7 +43,6 @@ export function chartFor(
   today: DateKey,
 ): HabitChartData {
   const start = daysBetween(habitStartDate(habit), from) >= 0 ? from : habitStartDate(habit);
-  if (habit.kind === 'abstain') return cleanStreakChart(habit, data, start, today);
   if (isWeeklyHabit(habit)) return weeklyChart(habit, data.habitLogs, start, today);
   if (habit.kind === 'check') return weeklyRateChart(habit, data.habitLogs, start, today);
   return dailyChart(habit, data.habitLogs, start, today);
@@ -101,22 +98,6 @@ function weeklyRateChart(
     return [{ date: monday, value, done: value === 100 }];
   });
   return { kind: 'weeklyRate', points, target: null, unit: '%' };
-}
-
-/** Отказ: длина серии в каждый день. Срыв — падение до нуля. */
-function cleanStreakChart(
-  habit: AbstainHabit,
-  data: AppData,
-  start: DateKey,
-  today: DateKey,
-): HabitChartData {
-  let run = 0;
-  const points = eachDay(start, today).map((date) => {
-    const clean = isCleanDay(habit, data, date);
-    run = clean ? run + 1 : 0;
-    return { date, value: run, done: clean };
-  });
-  return { kind: 'cleanStreak', points, target: null, unit: 'дней' };
 }
 
 /** Понедельники всех недель от start до today. */

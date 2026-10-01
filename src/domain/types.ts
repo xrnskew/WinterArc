@@ -36,7 +36,6 @@ export interface AppData {
   arcs: Arc[];
   habits: Habit[];
   habitLogs: HabitLogs;
-  abstainEvents: AbstainEvent[];
   ratingScales: RatingScale[];
   /** Оценки и заметка за день. */
   days: Record<DateKey, DayEntry>;
@@ -76,7 +75,7 @@ export type Schedule =
 /** Оттенок привычки. Хранится ключ, а не цвет: как он выглядит, решает тема. */
 export type AccentKey = 'snow' | 'frost' | 'silver' | 'steel' | 'ash' | 'smoke';
 
-export type HabitKind = 'check' | 'count' | 'time' | 'abstain';
+export type HabitKind = 'check' | 'count' | 'time';
 
 interface HabitBase {
   id: Id;
@@ -108,33 +107,13 @@ export interface TimeHabit extends HabitBase {
   targetPeriod: 'day' | 'week';
 }
 
-/** Отказ от вредного. Каждый день чистый, пока не отмечен срыв. */
-export interface AbstainHabit extends HabitBase {
-  kind: 'abstain';
-  /** С какого дня считаем чистые дни. */
-  startDate: DateKey;
-  /** Сколько стоила привычка в день — для «сэкономлено». null — не считаем. */
-  costPerDay: number | null;
-}
-
-export type Habit = CheckHabit | CountHabit | TimeHabit | AbstainHabit;
+export type Habit = CheckHabit | CountHabit | TimeHabit;
 
 /**
  * habitLogs[habitId][date] = значение за день. Нет записи — значит 0.
- * check → 1, count → штуки, time → минуты. Для abstain не используется.
+ * check → 1, count → штуки, time → минуты.
  */
 export type HabitLogs = Record<Id, Record<DateKey, number>>;
-
-export interface AbstainEvent {
-  id: Id;
-  habitId: Id;
-  /** Можно отметить задним числом. */
-  date: DateKey;
-  /** relapse — срыв, craving — пережитая тяга (после «ТЯГА СЕЙЧАС»). */
-  type: 'relapse' | 'craving';
-  reason: string;
-  createdAt: Timestamp;
-}
 
 // ── Оценки дня ───────────────────────────────────────────
 
@@ -214,7 +193,6 @@ export type WidgetType =
   | 'discipline'
   | 'today'
   | 'streak'
-  | 'moneySaved'
   | 'goal'
   | 'ratingTrend'
   | 'heatmap'
@@ -244,6 +222,4 @@ export interface Settings {
   themeId: 'winter';
   snow: SnowIntensity;
   performance: PerformanceMode;
-  /** Знак валюты для «сэкономлено»: "₽". */
-  currency: string;
 }

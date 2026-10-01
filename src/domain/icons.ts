@@ -37,7 +37,7 @@ export const ICON_NAMES = [
   'salad',
   'utensils',
   'coffee',
-  // отказы
+  // досуг и соблазны
   'cigarette',
   'wine',
   'beer',

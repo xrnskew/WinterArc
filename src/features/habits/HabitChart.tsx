@@ -1,6 +1,4 @@
 import {
-  Area,
-  AreaChart,
   Bar,
   BarChart,
   CartesianGrid,
@@ -20,7 +18,7 @@ import { niceTicks } from '../../lib/niceTicks';
 
 /**
  * График на странице привычки. Монохром по теме: выполненное — белым,
- * остальное — серым, срыв — красной точкой. Один ряд данных, поэтому
+ * остальное — серым. Один ряд данных, поэтому
  * без легенды: что показано, говорит заголовок карточки.
  * Recharts тяжёлый, поэтому этот файл грузится отдельно (lazy).
  */
@@ -51,8 +49,6 @@ function chartCaption(chart: HabitChartData): string {
       return `Белые — неделя выполнена. Линия — цель: ${chart.target} ${chart.unit} в неделю.`;
     case 'weeklyRate':
       return 'Доля дней по плану, когда отмечено. Белые — все дни недели.';
-    case 'cleanStreak':
-      return 'Сколько дней подряд без срыва. Красные точки — срывы.';
   }
 }
 
@@ -68,11 +64,7 @@ export default function HabitChart({ chart, theme }: HabitChartProps) {
 
   const tooltip = (
     <Tooltip
-      cursor={
-        chart.kind === 'cleanStreak'
-          ? { stroke: c.gray500, strokeWidth: 1 }
-          : { fill: 'rgba(255,255,255,0.05)' }
-      }
+      cursor={{ fill: 'rgba(255,255,255,0.05)' }}
       isAnimationActive={false}
       content={({ active, payload }) => {
         const point = payload?.[0]?.payload as ChartPoint | undefined;
@@ -116,59 +108,24 @@ export default function HabitChart({ chart, theme }: HabitChartProps) {
       <p className="mb-3 text-sm text-muted">{chartCaption(chart)}</p>
       <div style={{ height: CHART_HEIGHT }} aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
-          {chart.kind === 'cleanStreak' ? (
-            <AreaChart data={chart.points} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
-              {grid}
-              {xAxis}
-              {yAxis}
-              {tooltip}
-              <Area
-                type="stepAfter"
-                dataKey="value"
-                stroke={c.number}
-                strokeWidth={2}
-                fill={c.number}
-                fillOpacity={0.1}
-                isAnimationActive={false}
-                activeDot={{ r: 4, fill: c.number, stroke: c.graphite, strokeWidth: 2 }}
-                // Срыв — красная точка на нуле.
-                dot={(props: { cx?: number; cy?: number; index?: number; payload?: ChartPoint }) =>
-                  props.payload && !props.payload.done ? (
-                    <circle
-                      key={props.index}
-                      cx={props.cx}
-                      cy={props.cy}
-                      r={4}
-                      fill={c.danger}
-                      stroke={c.graphite}
-                      strokeWidth={2}
-                    />
-                  ) : (
-                    <g key={props.index} />
-                  )
-                }
-              />
-            </AreaChart>
-          ) : (
-            <BarChart
-              data={chart.points}
-              margin={{ top: 8, right: 4, bottom: 0, left: 0 }}
-              barCategoryGap="20%"
-            >
-              {grid}
-              {xAxis}
-              {yAxis}
-              {tooltip}
-              {chart.target !== null && (
-                <ReferenceLine y={chart.target} stroke={c.gray400} strokeWidth={1} />
-              )}
-              <Bar dataKey="value" maxBarSize={24} radius={[4, 4, 0, 0]} isAnimationActive={false}>
-                {chart.points.map((point) => (
-                  <Cell key={point.date} fill={point.done ? c.number : c.gray400} />
-                ))}
-              </Bar>
-            </BarChart>
-          )}
+          <BarChart
+            data={chart.points}
+            margin={{ top: 8, right: 4, bottom: 0, left: 0 }}
+            barCategoryGap="20%"
+          >
+            {grid}
+            {xAxis}
+            {yAxis}
+            {tooltip}
+            {chart.target !== null && (
+              <ReferenceLine y={chart.target} stroke={c.gray400} strokeWidth={1} />
+            )}
+            <Bar dataKey="value" maxBarSize={24} radius={[4, 4, 0, 0]} isAnimationActive={false}>
+              {chart.points.map((point) => (
+                <Cell key={point.date} fill={point.done ? c.number : c.gray400} />
+              ))}
+            </Bar>
+          </BarChart>
         </ResponsiveContainer>
       </div>
 

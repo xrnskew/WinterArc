@@ -67,7 +67,7 @@ export function ArcSettings() {
         <p className="mt-2 text-sm text-muted">Сразу после этого начнём новую арку.</p>
         <div className="mt-6 flex flex-col gap-2">
           <Button
-            variant="danger"
+            variant="primary"
             size="lg"
             onClick={() => {
               setSheet(null);

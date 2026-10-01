@@ -138,7 +138,7 @@ export function WeekdayPicker({ value, onChange, invalid }: WeekdayPickerProps) 
                 checked
                   ? 'border-number bg-number text-night'
                   : invalid
-                    ? 'border-danger text-muted'
+                    ? 'border-gray-300 text-muted'
                     : 'border-gray-700 text-muted hover:text-text',
               )}
             >

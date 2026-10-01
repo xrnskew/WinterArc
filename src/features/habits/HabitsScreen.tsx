@@ -47,7 +47,7 @@ export function HabitsScreen() {
       {habits.length === 0 ? (
         <EmptyState
           title="Привычек пока нет"
-          text="Добавь первую: то, что хочешь делать каждый день, или то, от чего хочешь отказаться."
+          text="Добавь первую: то, что хочешь делать каждый день или несколько раз в неделю."
           action={
             <Button variant="primary" onClick={() => setAdding(true)}>
               Добавить привычку
@@ -69,7 +69,7 @@ export function HabitsScreen() {
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-base text-text">{habit.name}</span>
                       <span className="block text-sm text-muted">
-                        {describeHabit(draftFromHabit(habit), data.settings.currency)}
+                        {describeHabit(draftFromHabit(habit))}
                       </span>
                     </span>
                     <span className="shrink-0 text-right">
@@ -87,7 +87,6 @@ export function HabitsScreen() {
       <Sheet open={adding} onClose={() => setAdding(false)} title="Новая привычка">
         <HabitForm
           initial={EMPTY_HABIT_DRAFT}
-          currency={data.settings.currency}
           submitLabel="Добавить привычку"
           onCancel={() => setAdding(false)}
           onSubmit={(draft) => {

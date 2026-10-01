@@ -2,7 +2,7 @@ import { ChevronLeft } from 'lucide-react';
 import { lazy, Suspense, useState } from 'react';
 import { Link, useNavigate, useParams } from 'react-router';
 import { PATHS } from '../../app/routes';
-import { arcPhase, getActiveArc } from '../../domain/arc';
+import { getActiveArc } from '../../domain/arc';
 import { chartFor, type HabitChartKind } from '../../domain/habitCharts';
 import { describeHabit, draftFromHabit, getHabit } from '../../domain/habits';
 import { BigNumber } from '../../design/ui/BigNumber';
@@ -14,8 +14,6 @@ import { Sheet } from '../../design/ui/Sheet';
 import { THEMES } from '../../design/themes';
 import { useToday } from '../../hooks/useToday';
 import { useAppStore } from '../../store/useAppStore';
-import { AbstainDialogs, type AbstainDialog } from './abstain/AbstainDialogs';
-import { AbstainHistory } from './AbstainHistory';
 import { HabitForm } from './HabitForm';
 import { habitStatTiles } from './habitStats';
 
@@ -26,10 +24,9 @@ const CHART_TITLES: Record<HabitChartKind, string> = {
   daily: 'Последние 4 недели',
   weekly: 'По неделям',
   weeklyRate: 'Выполнение по неделям',
-  cleanStreak: 'Серия чистых дней',
 };
 
-/** Страница привычки: серии, статистика, график, для отказа — тяга, срывы и история. */
+/** Страница привычки: серии, статистика, график, правка и архив. */
 export function HabitDetailScreen() {
   const { habitId = '' } = useParams();
   const today = useToday();
@@ -38,7 +35,6 @@ export function HabitDetailScreen() {
   const updateHabit = useAppStore((state) => state.updateHabit);
   const archiveHabit = useAppStore((state) => state.archiveHabit);
   const [sheet, setSheet] = useState<'edit' | 'archive' | null>(null);
-  const [dialog, setDialog] = useState<AbstainDialog>(null);
 
   const habit = getHabit(data, habitId);
   const arc = getActiveArc(data);
@@ -65,19 +61,14 @@ export function HabitDetailScreen() {
     );
   }
 
-  const currency = data.settings.currency;
   const theme = THEMES[data.settings.themeId];
-  const tiles = habitStatTiles(habit, data, arc, today, currency);
+  const tiles = habitStatTiles(habit, data, arc, today);
   const chart = chartFor(habit, data, arc.startDate, today);
-  const arcActive = arcPhase(arc, today) === 'active';
 
   return (
     <>
       {backLink}
-      <ScreenHeader
-        title={habit.name}
-        description={describeHabit(draftFromHabit(habit), currency)}
-      />
+      <ScreenHeader title={habit.name} description={describeHabit(draftFromHabit(habit))} />
 
       <div className="flex flex-col gap-4">
         <GlassCard as="section" aria-label="Статистика" className="grid grid-cols-2 p-0">
@@ -93,25 +84,6 @@ export function HabitDetailScreen() {
           ))}
         </GlassCard>
 
-        {habit.kind === 'abstain' && arcActive && (
-          <div className="grid grid-cols-2 gap-2">
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={() => setDialog({ kind: 'craving', habit })}
-            >
-              Тяга сейчас
-            </Button>
-            <Button
-              variant="danger"
-              size="lg"
-              onClick={() => setDialog({ kind: 'relapse', habit })}
-            >
-              Срыв
-            </Button>
-          </div>
-        )}
-
         {chart.points.length > 0 && (
           <GlassCard as="section" className="p-5">
             <h2 className="mb-3 text-base text-text">{CHART_TITLES[chart.kind]}</h2>
@@ -120,8 +92,6 @@ export function HabitDetailScreen() {
             </Suspense>
           </GlassCard>
         )}
-
-        {habit.kind === 'abstain' && <AbstainHistory data={data} habitId={habit.id} />}
 
         <div className="flex flex-wrap gap-3 pt-2">
           <Button onClick={() => setSheet('edit')}>Изменить</Button>
@@ -134,7 +104,6 @@ export function HabitDetailScreen() {
       <Sheet open={sheet === 'edit'} onClose={() => setSheet(null)} title="Изменить привычку">
         <HabitForm
           initial={draftFromHabit(habit)}
-          currency={currency}
           submitLabel="Сохранить"
           lockKind
           onCancel={() => setSheet(null)}
@@ -151,7 +120,7 @@ export function HabitDetailScreen() {
         </p>
         <div className="mt-6 flex flex-col gap-2">
           <Button
-            variant="danger"
+            variant="primary"
             size="lg"
             onClick={() => {
               archiveHabit(habit.id);
@@ -165,8 +134,6 @@ export function HabitDetailScreen() {
           </Button>
         </div>
       </Sheet>
-
-      <AbstainDialogs dialog={dialog} date={today} today={today} onClose={() => setDialog(null)} />
     </>
   );
 }
