@@ -12,6 +12,7 @@ import {
   resizeWidget as resizeWidgetInData,
   widgetInfo,
 } from '../domain/dashboard';
+import { unlockAchievements as unlockInData } from '../domain/achievements';
 import { nowTimestamp } from '../domain/dates';
 import { setDayNote as setDayNoteInData, setRating as setRatingInData } from '../domain/days';
 import {
@@ -52,6 +53,7 @@ import type {
   WidgetSize,
   WidgetType,
 } from '../domain/types';
+import { saveReview, type ReviewAnswers } from '../domain/weeklyReview';
 import { newId } from '../lib/id';
 import { loadData, openBrowserStorage, saveData, type LoadResult } from '../storage/localStore';
 
@@ -88,6 +90,8 @@ interface AppState {
   notice: StorageNotice;
   /** false — данные сохранены более новой версией, перезаписывать нельзя. */
   canSave: boolean;
+  /** Жетоны, полученные только что, — для всплывающего сообщения. Не сохраняются. */
+  freshAchievements: string[];
 
   updateSettings: (patch: Partial<Settings>) => void;
   startArc: (request: StartArcRequest) => void;
@@ -126,6 +130,12 @@ interface AppState {
   moveWidget: (widgetId: Id, step: -1 | 1) => void;
   resizeWidget: (widgetId: Id, size: WidgetSize) => void;
 
+  /** Ответы обзора недели; ключ — понедельник. */
+  saveWeeklyReview: (monday: DateKey, answers: ReviewAnswers) => void;
+  /** Записать полученные жетоны и показать сообщение о них. */
+  unlockAchievements: (ids: string[]) => void;
+  dismissFreshAchievements: () => void;
+
   dismissNotice: () => void;
 }
 
@@ -154,6 +164,7 @@ export const useAppStore = create<AppState>((set) => {
     data: loaded.data,
     notice: persistent ? noticeFrom(loaded) : { kind: 'noStorage' },
     canSave: loaded.status !== 'newer',
+    freshAchievements: [],
 
     updateSettings: (patch) =>
       change((data) => ({ ...data, settings: { ...data.settings, ...patch } })),
@@ -233,6 +244,17 @@ export const useAppStore = create<AppState>((set) => {
     moveWidget: (widgetId, step) => change((data) => moveWidgetInData(data, widgetId, step)),
 
     resizeWidget: (widgetId, size) => change((data) => resizeWidgetInData(data, widgetId, size)),
+
+    saveWeeklyReview: (monday, answers) =>
+      change((data) => saveReview(data, monday, answers, nowTimestamp())),
+
+    unlockAchievements: (ids) =>
+      set((state) => ({
+        data: unlockInData(state.data, ids, nowTimestamp()),
+        freshAchievements: [...state.freshAchievements, ...ids],
+      })),
+
+    dismissFreshAchievements: () => set({ freshAchievements: [] }),
 
     dismissNotice: () => set({ notice: { kind: 'none' } }),
   };

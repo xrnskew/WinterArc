@@ -1,8 +1,11 @@
-import { Plus, SlidersHorizontal } from 'lucide-react';
+import { CalendarRange, ChevronRight, Plus, SlidersHorizontal } from 'lucide-react';
+import { Link } from 'react-router';
+import { PATHS } from '../../app/routes';
 import { useState } from 'react';
 import { getActiveArc } from '../../domain/arc';
 import { getGoal } from '../../domain/goals';
 import { getHabit } from '../../domain/habits';
+import { reviewDue } from '../../domain/weeklyReview';
 import type { AppData, WidgetInstance } from '../../domain/types';
 import { Button } from '../../design/ui/Button';
 import { EmptyState } from '../../design/ui/EmptyState';
@@ -39,10 +42,30 @@ export function CommandCenterScreen() {
   if (!arc) return null;
 
   const widgets = data.dashboard;
+  const dueWeek = reviewDue(data, arc, today);
 
   return (
     <div className="flex flex-col gap-8">
       <ArcHero arc={arc} data={data} today={today} firstOpen={firstOpen} />
+
+      {dueWeek && (
+        <Link
+          to={`${PATHS.review}?week=${dueWeek}`}
+          className="glass -mb-4 flex items-center gap-3 rounded-lg p-4 transition-colors duration-(--wa-motion-fast) hover:border-gray-500"
+        >
+          <CalendarRange
+            size={22}
+            strokeWidth={1.5}
+            className="shrink-0 text-text"
+            aria-hidden="true"
+          />
+          <span className="min-w-0 flex-1">
+            <span className="block text-base text-text">Подведи итоги недели</span>
+            <span className="block text-sm text-muted">Три вопроса и автоматическая сводка</span>
+          </span>
+          <ChevronRight size={18} className="shrink-0 text-gray-400" aria-hidden="true" />
+        </Link>
+      )}
 
       <section aria-label="Виджеты">
         <div className="mb-3 flex items-center justify-end gap-2">

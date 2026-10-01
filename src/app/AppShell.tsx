@@ -1,7 +1,10 @@
 import { Outlet, ScrollRestoration } from 'react-router';
 import { SnowBackground } from '../background/SnowBackground';
 import { THEMES } from '../design/themes';
+import { AchievementToast } from '../features/achievements/AchievementToast';
 import { OnboardingScreen } from '../features/onboarding/OnboardingScreen';
+import { useAchievementUnlocks } from '../hooks/useAchievementUnlocks';
+import { useToday } from '../hooks/useToday';
 import { cx } from '../lib/cx';
 import { useAppStore } from '../store/useAppStore';
 import { Navigation } from './Navigation';
@@ -15,6 +18,8 @@ export function AppShell() {
   const { snow, performance, themeId } = useAppStore((state) => state.data.settings);
   const hasArc = useAppStore((state) => state.data.activeArcId !== null);
   const notice = useAppStore((state) => state.notice);
+  const today = useToday();
+  useAchievementUnlocks(today);
 
   const background = (
     <SnowBackground intensity={snow} performance={performance} theme={THEMES[themeId]} />
@@ -47,6 +52,7 @@ export function AppShell() {
           {hasArc ? <Outlet /> : <OnboardingScreen />}
         </div>
       </main>
+      {hasArc && <AchievementToast today={today} />}
       <ScrollRestoration />
     </>
   );
