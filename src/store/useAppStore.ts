@@ -5,6 +5,13 @@ import {
   updateArc as updateArcInData,
   type ArcDraft,
 } from '../domain/arc';
+import {
+  addWidget as addWidgetToData,
+  moveWidget as moveWidgetInData,
+  removeWidget as removeWidgetFromData,
+  resizeWidget as resizeWidgetInData,
+  widgetInfo,
+} from '../domain/dashboard';
 import { nowTimestamp } from '../domain/dates';
 import { setDayNote as setDayNoteInData, setRating as setRatingInData } from '../domain/days';
 import {
@@ -15,7 +22,15 @@ import {
   type HabitDraft,
 } from '../domain/habits';
 import { setLog } from '../domain/progress';
-import type { AppData, DateKey, Id, Settings } from '../domain/types';
+import type {
+  AppData,
+  DateKey,
+  Id,
+  Settings,
+  WidgetInstance,
+  WidgetSize,
+  WidgetType,
+} from '../domain/types';
 import { newId } from '../lib/id';
 import { loadData, openBrowserStorage, saveData, type LoadResult } from '../storage/localStore';
 
@@ -65,6 +80,15 @@ interface AppState {
   setHabitLog: (habitId: Id, date: DateKey, value: number) => void;
   setRating: (date: DateKey, scaleId: Id, value: number | null) => void;
   setDayNote: (date: DateKey, note: string) => void;
+
+  /** Добавить виджет; target — привычка, шкала или цель, если виджет к ним привязан. */
+  addWidget: (
+    type: WidgetType,
+    target?: Pick<WidgetInstance, 'habitId' | 'scaleId' | 'goalId'>,
+  ) => void;
+  removeWidget: (widgetId: Id) => void;
+  moveWidget: (widgetId: Id, step: -1 | 1) => void;
+  resizeWidget: (widgetId: Id, size: WidgetSize) => void;
 
   dismissNotice: () => void;
 }
@@ -123,6 +147,22 @@ export const useAppStore = create<AppState>((set) => {
       change((data) => setRatingInData(data, date, scaleId, value)),
 
     setDayNote: (date, note) => change((data) => setDayNoteInData(data, date, note)),
+
+    addWidget: (type, target = {}) =>
+      change((data) =>
+        addWidgetToData(data, {
+          id: newId(),
+          type,
+          size: widgetInfo(type).defaultSize,
+          ...target,
+        }),
+      ),
+
+    removeWidget: (widgetId) => change((data) => removeWidgetFromData(data, widgetId)),
+
+    moveWidget: (widgetId, step) => change((data) => moveWidgetInData(data, widgetId, step)),
+
+    resizeWidget: (widgetId, size) => change((data) => resizeWidgetInData(data, widgetId, size)),
 
     dismissNotice: () => set({ notice: { kind: 'none' } }),
   };

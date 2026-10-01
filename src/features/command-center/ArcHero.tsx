@@ -20,6 +20,8 @@ interface ArcHeroProps {
   arc: Arc;
   data: AppData;
   today: DateKey;
+  /** Первое открытие за день — отсчёт «пересчитывается» от нуля. */
+  firstOpen: boolean;
 }
 
 const days = (n: number) => plural(n, 'день', 'дня', 'дней');
@@ -28,7 +30,7 @@ const days = (n: number) => plural(n, 'день', 'дня', 'дней');
  * Верх командного центра: название арки, отсчёт и зарубки.
  * Стоит прямо на метели, без стекла.
  */
-export function ArcHero({ arc, data, today }: ArcHeroProps) {
+export function ArcHero({ arc, data, today, firstOpen }: ArcHeroProps) {
   const phase = arcPhase(arc, today);
   const length = arcLength(arc);
   const dayNumber = arcDayNumber(arc, today);
@@ -55,7 +57,7 @@ export function ArcHero({ arc, data, today }: ArcHeroProps) {
       <p className="mt-1 text-sm text-muted">{formatRange(arc.startDate, arc.endDate)}</p>
 
       <div className="mt-8">
-        <BigNumber value={number} size="xl" />
+        <BigNumber value={number} size="xl" fromZero={firstOpen} />
         <p className="mt-1 text-sm text-muted">{label}</p>
       </div>
 

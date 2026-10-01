@@ -1,3 +1,4 @@
+import { defaultDashboard } from '../domain/dashboard';
 import type { AppData, RatingScale, Settings } from '../domain/types';
 import { newId as defaultNewId } from '../lib/id';
 
@@ -5,7 +6,7 @@ import { newId as defaultNewId } from '../lib/id';
  * Текущая версия формы данных. Поднимай её на 1, когда меняешь типы
  * в domain/types.ts, и добавляй шаг в migrations.ts.
  */
-export const CURRENT_VERSION = 2;
+export const CURRENT_VERSION = 3;
 
 export const DEFAULT_SETTINGS: Settings = {
   themeId: 'winter',
@@ -22,7 +23,7 @@ function defaultRatingScales(newId: () => string): RatingScale[] {
   ];
 }
 
-/** Данные нового пользователя: настройки по умолчанию, остальное пусто. */
+/** Данные нового пользователя: настройки, шкалы и виджеты по умолчанию, остальное пусто. */
 export function createEmptyData(newId: () => string = defaultNewId): AppData {
   return {
     version: CURRENT_VERSION,
@@ -37,6 +38,6 @@ export function createEmptyData(newId: () => string = defaultNewId): AppData {
     tasks: [],
     weeklyReviews: {},
     achievements: [],
-    dashboard: [],
+    dashboard: defaultDashboard(newId),
   };
 }

@@ -57,6 +57,26 @@ export const MIGRATIONS: Record<number, Migration> = {
       ),
     };
   },
+
+  /**
+   * v2 → v3: отсчёт и прогресс арки больше не виджеты — они всегда сверху
+   * командного центра. До v3 виджеты нельзя было настроить, поэтому пустой
+   * список заполняем набором по умолчанию.
+   */
+  3: (data) => {
+    const kept = objects(data.dashboard).filter(
+      (widget) => widget.type !== 'countdown' && widget.type !== 'arcProgress',
+    );
+    // Набор записан здесь целиком, а не взят из dashboard.ts: шаг миграции
+    // не должен меняться, даже если набор по умолчанию потом станет другим.
+    const defaults = [
+      { id: 'widget-v3-1', type: 'discipline', size: 'half' },
+      { id: 'widget-v3-2', type: 'week', size: 'half' },
+      { id: 'widget-v3-3', type: 'today', size: 'full' },
+      { id: 'widget-v3-4', type: 'why', size: 'full' },
+    ];
+    return { ...data, dashboard: kept.length > 0 ? kept : defaults };
+  },
 };
 
 export type MigrationResult =

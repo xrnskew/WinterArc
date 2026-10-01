@@ -187,23 +187,20 @@ export interface UnlockedAchievement {
   unlockedAt: Timestamp;
 }
 
+/**
+ * Виджеты командного центра. Отсчёт и прогресс арки — не виджеты:
+ * они всегда стоят сверху экрана.
+ */
 export type WidgetType =
-  | 'countdown'
-  | 'arcProgress'
-  | 'discipline'
-  | 'today'
-  | 'streak'
-  | 'goal'
-  | 'ratingTrend'
-  | 'heatmap'
-  | 'tasks'
-  | 'why'
-  | 'week';
+  'discipline' | 'today' | 'week' | 'streak' | 'ratingTrend' | 'heatmap' | 'goal' | 'tasks' | 'why';
+
+export type WidgetSize = 'half' | 'full';
 
 export interface WidgetInstance {
   id: Id;
   type: WidgetType;
-  size: 'half' | 'full';
+  /** half — половина ширины, full — вся ширина. */
+  size: WidgetSize;
   /** Настройка конкретного виджета. */
   habitId?: Id;
   goalId?: Id;

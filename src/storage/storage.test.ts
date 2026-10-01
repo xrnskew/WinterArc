@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { parseBackup, serializeBackup } from './backup';
 import { backupKey, CORRUPT_KEY_PREFIX, loadData, saveData, STORAGE_KEY } from './localStore';
-import { migrate, type Migration } from './migrations';
+import { migrate, MIGRATIONS, type Migration } from './migrations';
 import { createEmptyData, CURRENT_VERSION } from './schema';
 
 /** Поддельный localStorage на Map. */
@@ -166,7 +166,8 @@ describe('миграция v1 → v2: тип «Отказ» убран', () => {
   };
 
   it('отказы, их события и записи удаляются, остальное остаётся', () => {
-    const result = migrate(v1);
+    // Только шаг до v2 — следующие шаги проверяются отдельно.
+    const result = migrate(v1, MIGRATIONS, 2);
     expect(result.status).toBe('migrated');
     if (result.status !== 'migrated') return;
     const data = result.data as unknown as Record<string, unknown>;
@@ -184,5 +185,33 @@ describe('миграция v1 → v2: тип «Отказ» убран', () => {
     const loaded = loadData(storage, NOW);
     expect(loaded.status).toBe('migrated');
     expect(storage.map.get(backupKey(1))).toBe(JSON.stringify(v1));
+  });
+});
+
+describe('миграция v2 → v3: отсчёт и прогресс — не виджеты', () => {
+  const v2 = (dashboard: object[]) => ({ ...createEmptyData(), version: 2, dashboard });
+
+  it('пустой список виджетов заполняется набором по умолчанию', () => {
+    const result = migrate(v2([]));
+    expect(result.status).toBe('migrated');
+    if (result.status !== 'migrated') return;
+    expect(result.data.dashboard.map((w) => w.type)).toEqual([
+      'discipline',
+      'week',
+      'today',
+      'why',
+    ]);
+  });
+
+  it('countdown и arcProgress убираются, остальные остаются по порядку', () => {
+    const result = migrate(
+      v2([
+        { id: 'a', type: 'countdown', size: 'full' },
+        { id: 'b', type: 'streak', size: 'half', habitId: 'h' },
+        { id: 'c', type: 'arcProgress', size: 'half' },
+      ]),
+    );
+    if (result.status !== 'migrated') throw new Error(result.status);
+    expect(result.data.dashboard.map((w) => w.id)).toEqual(['b']);
   });
 });
