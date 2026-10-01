@@ -1,0 +1,234 @@
+@import 'tailwindcss';
+
+/*
+ * Связь токенов с классами Tailwind.
+ * Значений здесь нет: они приходят из themes/*.ts через applyTheme()
+ * в виде переменных --wa-*. Стандартные палитры Tailwind отключены
+ * (initial), поэтому в разметке доступны только цвета темы:
+ * bg-night, bg-graphite, text-muted, border-gray-700 и т. д.
+ */
+@theme inline {
+  --color-*: initial;
+  --color-night: var(--wa-color-night);
+  --color-graphite: var(--wa-color-graphite);
+  --color-gray-800: var(--wa-color-gray-800);
+  --color-gray-700: var(--wa-color-gray-700);
+  --color-gray-600: var(--wa-color-gray-600);
+  --color-gray-500: var(--wa-color-gray-500);
+  --color-gray-400: var(--wa-color-gray-400);
+  --color-gray-300: var(--wa-color-gray-300);
+  --color-text: var(--wa-color-text);
+  --color-muted: var(--wa-color-text-muted);
+  --color-number: var(--wa-color-number);
+  --color-danger: var(--wa-color-danger);
+  --color-danger-text: var(--wa-color-danger-text);
+  --color-danger-soft: var(--wa-color-danger-soft);
+  --color-glass-border: var(--wa-color-glass-border);
+  --color-accent-snow: var(--wa-accent-snow);
+  --color-accent-frost: var(--wa-accent-frost);
+  --color-accent-silver: var(--wa-accent-silver);
+  --color-accent-steel: var(--wa-accent-steel);
+  --color-accent-ash: var(--wa-accent-ash);
+  --color-accent-smoke: var(--wa-accent-smoke);
+
+  --font-*: initial;
+  --font-display: var(--wa-font-display);
+  --font-body: var(--wa-font-body);
+  --font-mono: var(--wa-font-mono);
+
+  --text-*: initial;
+  --text-xs: var(--wa-text-xs);
+  --text-xs--line-height: var(--wa-text-xs-line-height);
+  --text-sm: var(--wa-text-sm);
+  --text-sm--line-height: var(--wa-text-sm-line-height);
+  --text-base: var(--wa-text-base);
+  --text-base--line-height: var(--wa-text-base-line-height);
+  --text-lg: var(--wa-text-lg);
+  --text-lg--line-height: var(--wa-text-lg-line-height);
+  --text-xl: var(--wa-text-xl);
+  --text-xl--line-height: var(--wa-text-xl-line-height);
+  --text-2xl: var(--wa-text-2xl);
+  --text-2xl--line-height: var(--wa-text-2xl-line-height);
+  --text-3xl: var(--wa-text-3xl);
+  --text-3xl--line-height: var(--wa-text-3xl-line-height);
+  --text-4xl: var(--wa-text-4xl);
+  --text-4xl--line-height: var(--wa-text-4xl-line-height);
+  --text-5xl: var(--wa-text-5xl);
+  --text-5xl--line-height: var(--wa-text-5xl-line-height);
+  --text-6xl: var(--wa-text-6xl);
+  --text-6xl--line-height: var(--wa-text-6xl-line-height);
+
+  --radius-*: initial;
+  --radius-sm: var(--wa-radius-sm);
+  --radius-md: var(--wa-radius-md);
+  --radius-lg: var(--wa-radius-lg);
+
+  --shadow-glow: var(--wa-effect-glow);
+  --shadow-glow-strong: var(--wa-effect-glow-strong);
+
+  --ease-out: var(--wa-motion-ease-out);
+  --ease-out-expo: var(--wa-motion-ease-out-expo);
+}
+
+@layer base {
+  html {
+    background: var(--wa-color-night);
+    color: var(--wa-color-text);
+    font-family: var(--wa-font-body);
+    color-scheme: dark;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--wa-color-number);
+    outline-offset: 2px;
+  }
+
+  ::selection {
+    background: rgb(255 255 255 / 0.25);
+  }
+}
+
+@layer components {
+  /* Матовое стекло: снег мягко просвечивает сквозь карточку. */
+  .glass {
+    position: relative;
+    isolation: isolate;
+    background: var(--wa-color-glass);
+    -webkit-backdrop-filter: blur(var(--wa-effect-glass-blur));
+    backdrop-filter: blur(var(--wa-effect-glass-blur));
+    border: 1px solid var(--wa-color-glass-border);
+  }
+
+  /* Шум плёнки поверх стекла. */
+  .glass::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: var(--wa-effect-grain-opacity);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  /* Слабое устройство: размытие поверх анимации дорогое — стекло плотнее и без blur. */
+  :root[data-perf='lite'] .glass {
+    background: var(--wa-color-glass-lite);
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+
+  /* Заголовок экрана: единственное место, где пишем заглавными. */
+  .screen-title {
+    font-family: var(--wa-font-display);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  /* Цифры-табло: моноширинные, одинаковой ширины — при пересчёте не прыгают. */
+  .numeric {
+    font-family: var(--wa-font-mono);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'zero' 0;
+  }
+
+  /* Текст прямо на метели, без стекла: тёмный ореол, чтобы хлопья не мешали читать. */
+  .on-snow {
+    text-shadow:
+      0 0 2px rgb(10 10 10 / 0.9),
+      0 0 14px rgb(10 10 10 / 0.85);
+  }
+
+  /* Ползунок: тонкая серая дорожка и белый квадратный бегунок. */
+  .wa-range {
+    appearance: none;
+    height: 28px;
+    background: transparent;
+    cursor: pointer;
+  }
+
+  .wa-range::-webkit-slider-runnable-track {
+    height: 2px;
+    background: var(--wa-color-gray-700);
+  }
+
+  .wa-range::-moz-range-track {
+    height: 2px;
+    background: var(--wa-color-gray-700);
+  }
+
+  .wa-range::-webkit-slider-thumb {
+    appearance: none;
+    width: 18px;
+    height: 18px;
+    margin-top: -8px;
+    border-radius: var(--wa-radius-sm);
+    background: var(--wa-color-number);
+    box-shadow: var(--wa-effect-glow);
+  }
+
+  .wa-range::-moz-range-thumb {
+    width: 18px;
+    height: 18px;
+    border: none;
+    border-radius: var(--wa-radius-sm);
+    background: var(--wa-color-number);
+    box-shadow: var(--wa-effect-glow);
+  }
+
+  /*
+   * Короткая белая вспышка — отблеск фонаря при отметке.
+   * Слой поверх элемента, поэтому собственный фон элемента не трогаем.
+   */
+  .flash {
+    position: relative;
+  }
+
+  .flash::after {
+    content: '';
+    position: absolute;
+    inset: -1px;
+    border-radius: inherit;
+    pointer-events: none;
+    background: rgb(255 255 255 / 0.3);
+    box-shadow: var(--wa-effect-glow-strong);
+    animation: wa-flash 480ms var(--wa-motion-ease-out) forwards;
+  }
+}
+
+@keyframes wa-flash {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* CSS-снежинка: падает сверху вниз и сносится вбок на --drift. */
+@keyframes wa-fall {
+  from {
+    transform: translate3d(0, -10vh, 0);
+  }
+  to {
+    transform: translate3d(var(--drift), 110vh, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+}
