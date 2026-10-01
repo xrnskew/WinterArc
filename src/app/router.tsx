@@ -3,6 +3,7 @@ import { AchievementsScreen } from '../features/achievements/AchievementsScreen'
 import { AnalyticsScreen } from '../features/analytics/AnalyticsScreen';
 import { CheckinScreen } from '../features/checkin/CheckinScreen';
 import { CommandCenterScreen } from '../features/command-center/CommandCenterScreen';
+import { GoalDetailScreen } from '../features/goals/GoalDetailScreen';
 import { GoalsScreen } from '../features/goals/GoalsScreen';
 import { HabitDetailScreen } from '../features/habits/HabitDetailScreen';
 import { HabitsScreen } from '../features/habits/HabitsScreen';
@@ -28,6 +29,7 @@ export const router = createBrowserRouter([
       { path: PATHS.habits, element: <HabitsScreen /> },
       { path: `${PATHS.habits}/:habitId`, element: <HabitDetailScreen /> },
       { path: PATHS.goals, element: <GoalsScreen /> },
+      { path: `${PATHS.goals}/:goalId`, element: <GoalDetailScreen /> },
       { path: PATHS.more, element: <MoreScreen /> },
       { path: PATHS.analytics, element: <AnalyticsScreen /> },
       { path: PATHS.review, element: <WeeklyReviewScreen /> },

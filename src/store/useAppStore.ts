@@ -15,6 +15,19 @@ import {
 import { nowTimestamp } from '../domain/dates';
 import { setDayNote as setDayNoteInData, setRating as setRatingInData } from '../domain/days';
 import {
+  addEntry,
+  addGoal as addGoalToData,
+  addStep,
+  archiveGoal as archiveGoalInData,
+  goalFromDraft,
+  removeEntry,
+  removeStep,
+  toggleStep,
+  updateGoal as updateGoalInData,
+  type EntryDraft,
+  type GoalDraft,
+} from '../domain/goals';
+import {
   addHabit as addHabitToData,
   archiveHabit as archiveHabitInData,
   habitFromDraft,
@@ -22,6 +35,14 @@ import {
   type HabitDraft,
 } from '../domain/habits';
 import { setLog } from '../domain/progress';
+import {
+  addTask as addTaskToData,
+  deleteTask as deleteTaskFromData,
+  taskFromDraft,
+  toggleTask as toggleTaskInData,
+  updateTask as updateTaskInData,
+  type TaskDraft,
+} from '../domain/tasks';
 import type {
   AppData,
   DateKey,
@@ -80,6 +101,21 @@ interface AppState {
   setHabitLog: (habitId: Id, date: DateKey, value: number) => void;
   setRating: (date: DateKey, scaleId: Id, value: number | null) => void;
   setDayNote: (date: DateKey, note: string) => void;
+
+  /** Новая цель привязывается к текущей арке. */
+  addGoal: (draft: GoalDraft) => void;
+  updateGoal: (goalId: Id, draft: GoalDraft) => void;
+  archiveGoal: (goalId: Id) => void;
+  addGoalStep: (goalId: Id, title: string) => void;
+  toggleGoalStep: (goalId: Id, stepId: Id) => void;
+  removeGoalStep: (goalId: Id, stepId: Id) => void;
+  addGoalEntry: (goalId: Id, entry: EntryDraft) => void;
+  removeGoalEntry: (goalId: Id, entryId: Id) => void;
+
+  addTask: (draft: TaskDraft) => void;
+  updateTask: (taskId: Id, draft: TaskDraft) => void;
+  toggleTask: (taskId: Id) => void;
+  deleteTask: (taskId: Id) => void;
 
   /** Добавить виджет; target — привычка, шкала или цель, если виджет к ним привязан. */
   addWidget: (
@@ -147,6 +183,40 @@ export const useAppStore = create<AppState>((set) => {
       change((data) => setRatingInData(data, date, scaleId, value)),
 
     setDayNote: (date, note) => change((data) => setDayNoteInData(data, date, note)),
+
+    addGoal: (draft) =>
+      change((data) =>
+        addGoalToData(data, goalFromDraft(draft, newId, data.activeArcId, nowTimestamp())),
+      ),
+
+    updateGoal: (goalId, draft) =>
+      change((data) => updateGoalInData(data, goalId, draft, nowTimestamp())),
+
+    archiveGoal: (goalId) => change((data) => archiveGoalInData(data, goalId, nowTimestamp())),
+
+    addGoalStep: (goalId, title) =>
+      change((data) => addStep(data, goalId, newId(), title, nowTimestamp())),
+
+    toggleGoalStep: (goalId, stepId) =>
+      change((data) => toggleStep(data, goalId, stepId, nowTimestamp())),
+
+    removeGoalStep: (goalId, stepId) =>
+      change((data) => removeStep(data, goalId, stepId, nowTimestamp())),
+
+    addGoalEntry: (goalId, entry) =>
+      change((data) => addEntry(data, goalId, newId(), entry, nowTimestamp())),
+
+    removeGoalEntry: (goalId, entryId) =>
+      change((data) => removeEntry(data, goalId, entryId, nowTimestamp())),
+
+    addTask: (draft) =>
+      change((data) => addTaskToData(data, taskFromDraft(draft, newId(), nowTimestamp()))),
+
+    updateTask: (taskId, draft) => change((data) => updateTaskInData(data, taskId, draft)),
+
+    toggleTask: (taskId) => change((data) => toggleTaskInData(data, taskId, nowTimestamp())),
+
+    deleteTask: (taskId) => change((data) => deleteTaskFromData(data, taskId)),
 
     addWidget: (type, target = {}) =>
       change((data) =>

@@ -1,12 +1,12 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
-import { WIDGET_CATALOG, type WidgetInfo } from '../../domain/dashboard';
+import { WIDGET_CATALOG, type WidgetInfo, type WidgetTarget } from '../../domain/dashboard';
 import { activeScales } from '../../domain/days';
+import { activeGoals } from '../../domain/goals';
 import { arcHabits } from '../../domain/habits';
 import type { AppData, Arc, WidgetInstance, WidgetType } from '../../domain/types';
 import { HabitIcon } from '../../design/ui/HabitIcon';
 import { Sheet } from '../../design/ui/Sheet';
-import { WIDGET_COMPONENTS } from './widgets/registry';
 
 interface AddWidgetSheetProps {
   open: boolean;
@@ -16,11 +16,47 @@ interface AddWidgetSheetProps {
   onAdd: (type: WidgetType, target: Pick<WidgetInstance, 'habitId' | 'scaleId' | 'goalId'>) => void;
 }
 
-/** Вариант выбора на втором шаге: привычка или шкала. */
+/** Вариант выбора на втором шаге: привычка, шкала или цель. */
 interface TargetOption {
   id: string;
   name: string;
   icon: Parameters<typeof HabitIcon>[0]['name'];
+}
+
+/** Подписи второго шага и поле виджета, куда записать выбор. */
+const TARGET_TEXT: Record<
+  NonNullable<WidgetTarget>,
+  { question: string; empty: string; key: 'habitId' | 'scaleId' | 'goalId' }
+> = {
+  habit: { question: 'Для какой привычки?', empty: 'Привычек в арке пока нет.', key: 'habitId' },
+  scale: { question: 'Для какой оценки?', empty: 'Шкал оценок нет.', key: 'scaleId' },
+  goal: {
+    question: 'Для какой цели?',
+    empty: 'Целей пока нет — добавь их на экране «Цели».',
+    key: 'goalId',
+  },
+};
+
+/** Из чего выбирать на втором шаге. */
+function targetOptions(target: WidgetTarget, data: AppData, arc: Arc): TargetOption[] {
+  switch (target) {
+    case 'habit':
+      return arcHabits(data, arc).map((habit) => ({
+        id: habit.id,
+        name: habit.name,
+        icon: habit.icon,
+      }));
+    case 'scale':
+      return activeScales(data).map((scale) => ({
+        id: scale.id,
+        name: scale.name,
+        icon: scale.icon,
+      }));
+    case 'goal':
+      return activeGoals(data).map((goal) => ({ id: goal.id, name: goal.title, icon: 'target' }));
+    default:
+      return [];
+  }
 }
 
 const ROW =
@@ -38,15 +74,7 @@ export function AddWidgetSheet({ open, data, arc, onClose, onAdd }: AddWidgetShe
     onClose();
   };
 
-  // Показываем только те виджеты, для которых уже есть экран.
-  const catalog = WIDGET_CATALOG.filter((info) => WIDGET_COMPONENTS[info.type]);
-
-  const targets: TargetOption[] =
-    picked?.target === 'habit'
-      ? arcHabits(data, arc).map((habit) => ({ id: habit.id, name: habit.name, icon: habit.icon }))
-      : picked?.target === 'scale'
-        ? activeScales(data).map((scale) => ({ id: scale.id, name: scale.name, icon: scale.icon }))
-        : [];
+  const targets = targetOptions(picked?.target ?? null, data, arc);
 
   const choose = (info: WidgetInfo) => {
     if (info.target === null) {
@@ -59,7 +87,8 @@ export function AddWidgetSheet({ open, data, arc, onClose, onAdd }: AddWidgetShe
 
   const chooseTarget = (id: string) => {
     if (!picked) return;
-    onAdd(picked.type, picked.target === 'habit' ? { habitId: id } : { scaleId: id });
+    const key = TARGET_TEXT[picked.target!].key;
+    onAdd(picked.type, { [key]: id });
     close();
   };
 
@@ -75,13 +104,9 @@ export function AddWidgetSheet({ open, data, arc, onClose, onAdd }: AddWidgetShe
             <ChevronLeft size={18} strokeWidth={1.5} aria-hidden="true" />
             Все виджеты
           </button>
-          <p className="mb-2 text-sm text-muted">
-            {picked.target === 'habit' ? 'Для какой привычки?' : 'Для какой оценки?'}
-          </p>
+          <p className="mb-2 text-sm text-muted">{TARGET_TEXT[picked.target!].question}</p>
           {targets.length === 0 ? (
-            <p className="text-base text-text">
-              {picked.target === 'habit' ? 'Привычек в арке пока нет.' : 'Шкал оценок нет.'}
-            </p>
+            <p className="text-base text-text">{TARGET_TEXT[picked.target!].empty}</p>
           ) : (
             <ul>
               {targets.map((target) => (
@@ -97,7 +122,7 @@ export function AddWidgetSheet({ open, data, arc, onClose, onAdd }: AddWidgetShe
         </>
       ) : (
         <ul>
-          {catalog.map((info) => (
+          {WIDGET_CATALOG.map((info) => (
             <li key={info.type}>
               <button type="button" className={ROW} onClick={() => choose(info)}>
                 <span className="min-w-0 flex-1">

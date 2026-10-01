@@ -1,5 +1,10 @@
-import { CircleAlert } from 'lucide-react';
-import type { InputHTMLAttributes, ReactNode, TextareaHTMLAttributes } from 'react';
+import { ChevronDown, CircleAlert } from 'lucide-react';
+import type {
+  InputHTMLAttributes,
+  ReactNode,
+  SelectHTMLAttributes,
+  TextareaHTMLAttributes,
+} from 'react';
 import { cx } from '../../lib/cx';
 import { describedBy } from './describedBy';
 
@@ -48,6 +53,30 @@ export function NumberInput({ value, onChange, className, ...rest }: NumberInput
 export function TextArea({ className, ...rest }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return (
     <textarea className={cx(FIELD_CLASS, 'min-h-28 resize-y px-3 py-3', className)} {...rest} />
+  );
+}
+
+/** Выбор из списка: обычный select — на телефоне откроется системный список. */
+export function SelectInput({
+  className,
+  children,
+  ...rest
+}: SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <div className="relative">
+      <select
+        className={cx(FIELD_CLASS, 'h-12 cursor-pointer appearance-none pr-10 pl-3', className)}
+        {...rest}
+      >
+        {children}
+      </select>
+      <ChevronDown
+        size={18}
+        strokeWidth={1.5}
+        className="pointer-events-none absolute top-1/2 right-3 -translate-y-1/2 text-muted"
+        aria-hidden="true"
+      />
+    </div>
   );
 }
 

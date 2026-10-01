@@ -1,6 +1,7 @@
 import { Plus, SlidersHorizontal } from 'lucide-react';
 import { useState } from 'react';
 import { getActiveArc } from '../../domain/arc';
+import { getGoal } from '../../domain/goals';
 import { getHabit } from '../../domain/habits';
 import type { AppData, WidgetInstance } from '../../domain/types';
 import { Button } from '../../design/ui/Button';
@@ -13,10 +14,11 @@ import { ArcHero } from './ArcHero';
 import { WidgetFrame } from './widgets/WidgetFrame';
 import { WIDGET_COMPONENTS } from './widgets/registry';
 
-/** Заголовок виджета, привязанного к привычке или шкале, — её название. */
+/** Заголовок виджета, привязанного к привычке, шкале или цели, — её название. */
 function widgetTitle(widget: WidgetInstance, data: AppData): string | undefined {
   if (widget.habitId) return getHabit(data, widget.habitId)?.name;
   if (widget.scaleId) return data.ratingScales.find((scale) => scale.id === widget.scaleId)?.name;
+  if (widget.goalId) return getGoal(data, widget.goalId)?.title;
   return undefined;
 }
 
@@ -36,7 +38,7 @@ export function CommandCenterScreen() {
   // AppShell показывает экраны только при текущей арке, но TypeScript об этом не знает.
   if (!arc) return null;
 
-  const widgets = data.dashboard.filter((widget) => WIDGET_COMPONENTS[widget.type]);
+  const widgets = data.dashboard;
 
   return (
     <div className="flex flex-col gap-8">
@@ -65,7 +67,7 @@ export function CommandCenterScreen() {
         {widgets.length === 0 ? (
           <EmptyState
             title="Виджетов нет"
-            text="Собери свой экран: индекс недели, серии привычек, оценки, тепловые карты."
+            text="Собери свой экран: индекс недели, серии привычек, оценки, цели и задачи."
             action={
               <Button variant="primary" onClick={() => setAdding(true)}>
                 Добавить виджет
@@ -75,7 +77,7 @@ export function CommandCenterScreen() {
         ) : (
           <div className="grid grid-cols-2 gap-3">
             {widgets.map((widget, i) => {
-              const Widget = WIDGET_COMPONENTS[widget.type]!;
+              const Widget = WIDGET_COMPONENTS[widget.type];
               return (
                 <WidgetFrame
                   key={widget.id}

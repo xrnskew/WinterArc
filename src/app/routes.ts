@@ -28,6 +28,12 @@ export const PATHS = {
 /** Адрес страницы привычки. */
 export const habitPath = (habitId: string) => `/habits/${habitId}`;
 
+/** Адрес страницы цели. */
+export const goalPath = (goalId: string) => `/goals/${goalId}`;
+
+/** Экран целей, вкладка «Задачи». */
+export const TASKS_PATH = `${PATHS.goals}?tab=tasks`;
+
 export interface NavItem {
   to: string;
   label: string;
