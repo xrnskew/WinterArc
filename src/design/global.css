@@ -57,6 +57,8 @@
   --text-5xl--line-height: var(--wa-text-5xl-line-height);
   --text-6xl: var(--wa-text-6xl);
   --text-6xl--line-height: var(--wa-text-6xl-line-height);
+  --text-7xl: var(--wa-text-7xl);
+  --text-7xl--line-height: var(--wa-text-7xl-line-height);
 
   --radius-*: initial;
   --radius-sm: var(--wa-radius-sm);

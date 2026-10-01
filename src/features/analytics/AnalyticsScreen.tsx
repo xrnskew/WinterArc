@@ -44,7 +44,7 @@ export function AnalyticsScreen() {
         />
       ) : (
         <>
-          <div className="mb-5">
+          <div className="mb-5 lg:max-w-xl">
             <Segmented
               label="Раздел аналитики"
               value={tab}

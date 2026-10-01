@@ -19,7 +19,8 @@ const ROW_LABELS = ['пн', '', 'ср', '', 'пт', '', ''];
  */
 export function Heatmap({ weeks, today, label }: HeatmapProps) {
   return (
-    <div>
+    // На широком экране клетки не раздуваются: карта не шире 672px.
+    <div className="max-w-2xl">
       <div className="flex gap-1.5" role="img" aria-label={label}>
         {/* Подписи дней недели слева. */}
         <div className="grid shrink-0 grid-rows-7 gap-[3px] text-xs leading-none text-muted">

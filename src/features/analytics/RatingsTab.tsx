@@ -32,7 +32,8 @@ export function RatingsTab({ data, arc, today }: RatingsTabProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    // Десктоп — шкалы рядом: две колонки, на самом широком — три.
+    <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
       {scales.map((scale) => {
         const average = arcRatingAverage(data, scale.id, arc, today);
         const extremes = weekdayExtremes(data, scale.id, arc, today);

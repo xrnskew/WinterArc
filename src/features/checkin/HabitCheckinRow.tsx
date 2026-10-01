@@ -48,8 +48,9 @@ export function HabitCheckinRow({ habit, data, date }: HabitCheckinRowProps) {
   }
 
   return (
-    <li className="px-4 py-3">
-      <div className="flex items-center gap-3">
+    // Телефон: степпер под названием (иначе название не помещается). Десктоп: в одну строку.
+    <li className="px-4 py-3 lg:flex lg:items-center lg:gap-4">
+      <div className="flex min-w-0 items-center gap-3 lg:flex-1">
         {target !== null ? (
           <CheckSquare
             checked={done}
@@ -70,7 +71,7 @@ export function HabitCheckinRow({ habit, data, date }: HabitCheckinRowProps) {
         </Link>
       </div>
       {habit.kind !== 'check' && (
-        <div className="mt-2 pl-14">
+        <div className="mt-2 pl-14 lg:mt-0 lg:shrink-0 lg:pl-0">
           <Stepper
             value={value}
             onChange={setValue}

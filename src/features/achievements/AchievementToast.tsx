@@ -29,7 +29,8 @@ export function AchievementToast({ today }: { today: DateKey }) {
   return (
     <div
       role="status"
-      className="fixed inset-x-4 bottom-(--wa-nav-clearance) z-40 mx-auto max-w-sm md:bottom-6"
+      // На десктопе — по центру области контента, правее боковой панели.
+      className="fixed inset-x-4 bottom-(--wa-nav-clearance) z-40 mx-auto max-w-sm md:bottom-6 md:left-26 lg:left-64"
     >
       <div className="flex items-center gap-3 rounded-lg border border-glass-border bg-graphite p-3 shadow-glow">
         {first && <IceToken badge={first.badge} tier={first.tier} earned size={44} />}

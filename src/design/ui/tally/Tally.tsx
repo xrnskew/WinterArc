@@ -1,6 +1,6 @@
 import { useId, useRef, type CSSProperties } from 'react';
 import { useElementWidth } from '../../../hooks/useElementWidth';
-import { layoutTally, MIN_UNIT_PX } from './tallyLayout';
+import { layoutTally, MAX_TICK_PX, MIN_UNIT_PX } from './tallyLayout';
 
 export interface TallyDay {
   key: string;
@@ -20,10 +20,17 @@ interface TallyProps {
   minUnitPx?: number;
 }
 
-const ROW_HEIGHT = 24;
-const TODAY_EXTRA = 8; // сегодняшняя черта выше остальных
 const FUTURE_SHARE = 0.4; // будущие дни — короткие бледные риски
 const ROW_GAP = 12;
+
+/** Размеры черт: обычные (телефон, превью) и крупные — когда лента шире LARGE_FROM_PX. */
+const SIZES = {
+  normal: { rowHeight: 24, todayExtra: 8, maxTick: MAX_TICK_PX },
+  // На десктопе лента тянется на всю ширину экрана: черты выше и чуть толще,
+  // чтобы она оставалась главным элементом, а не тонким пунктиром.
+  large: { rowHeight: 44, todayExtra: 12, maxTick: 5 },
+};
+const LARGE_FROM_PX = 900;
 
 /** Цвет прошедшего дня: чем выше индекс дисциплины, тем ближе к белому. */
 function pastColor(score: number | null): string {
@@ -42,16 +49,18 @@ export function Tally({ days, label, todayCaption, minUnitPx = MIN_UNIT_PX }: Ta
   // id для SVG-фильтра свечения: только буквы и цифры, чтобы url(#…) не сломался.
   const glowId = `tally-glow-${useId().replace(/[^a-zA-Z0-9]/g, '')}`;
 
+  const { rowHeight, todayExtra, maxTick } = width >= LARGE_FROM_PX ? SIZES.large : SIZES.normal;
   const layout =
     width > 0
       ? layoutTally(
           days.map((d) => d.weekday),
           width,
           minUnitPx,
+          maxTick,
         )
       : null;
-  const rowPitch = ROW_HEIGHT + TODAY_EXTRA + ROW_GAP;
-  const height = layout ? layout.rows * rowPitch - ROW_GAP : ROW_HEIGHT + TODAY_EXTRA;
+  const rowPitch = rowHeight + todayExtra + ROW_GAP;
+  const height = layout ? layout.rows * rowPitch - ROW_GAP : rowHeight + todayExtra;
 
   const todayIndex = days.findIndex((d) => d.status === 'today');
   const todayPosition = layout && todayIndex >= 0 ? layout.positions[todayIndex] : null;
@@ -72,10 +81,10 @@ export function Tally({ days, label, todayCaption, minUnitPx = MIN_UNIT_PX }: Ta
         {layout &&
           days.map((day, i) => {
             const { x, row } = layout.positions[i];
-            const baseline = row * rowPitch + TODAY_EXTRA + ROW_HEIGHT;
+            const baseline = row * rowPitch + todayExtra + rowHeight;
 
             if (day.status === 'future') {
-              const h = ROW_HEIGHT * FUTURE_SHARE;
+              const h = rowHeight * FUTURE_SHARE;
               return (
                 <rect
                   key={day.key}
@@ -89,7 +98,7 @@ export function Tally({ days, label, todayCaption, minUnitPx = MIN_UNIT_PX }: Ta
             }
 
             if (day.status === 'today') {
-              const h = ROW_HEIGHT + TODAY_EXTRA;
+              const h = rowHeight + todayExtra;
               return (
                 <rect
                   key={day.key}
@@ -107,9 +116,9 @@ export function Tally({ days, label, todayCaption, minUnitPx = MIN_UNIT_PX }: Ta
               <rect
                 key={day.key}
                 x={x}
-                y={baseline - ROW_HEIGHT}
+                y={baseline - rowHeight}
                 width={layout.tickWidth}
-                height={ROW_HEIGHT}
+                height={rowHeight}
                 style={{ fill: pastColor(day.score) }}
               />
             );

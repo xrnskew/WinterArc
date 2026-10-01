@@ -34,7 +34,7 @@ export default function RatingChart({ weeks, average, theme }: RatingChartProps)
 
   return (
     <div>
-      <div style={{ height: 150 }} aria-hidden="true">
+      <div className="h-37.5 lg:h-50" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={weeks} margin={{ top: 8, right: 8, bottom: 0, left: 0 }}>
             <CartesianGrid vertical={false} stroke={c.gray800} />

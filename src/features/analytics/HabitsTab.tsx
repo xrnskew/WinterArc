@@ -31,7 +31,8 @@ export function HabitsTab({ data, arc, today }: HabitsTabProps) {
   }
 
   return (
-    <div className="flex flex-col gap-4">
+    // На широком экране — карты привычек в две колонки.
+    <div className="grid gap-4 xl:grid-cols-2">
       {habits.map((habit) => {
         const rate = habitArcRate(habit, data, arc, today);
         const percent = rate.total > 0 ? Math.round((rate.done / rate.total) * 100) : null;

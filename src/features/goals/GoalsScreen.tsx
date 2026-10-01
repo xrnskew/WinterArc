@@ -98,7 +98,11 @@ export function GoalsScreen() {
               }
             />
           ) : (
-            goals.map((goal) => <GoalCard key={goal.id} goal={goal} today={today} />)
+            <div className="grid gap-3 lg:grid-cols-2">
+              {goals.map((goal) => (
+                <GoalCard key={goal.id} goal={goal} today={today} />
+              ))}
+            </div>
           )}
 
           {reached.length > 0 && (
@@ -106,7 +110,7 @@ export function GoalsScreen() {
               <summary className="on-snow cursor-pointer py-2 text-sm text-muted hover:text-text">
                 Достигнутые: <span className="numeric">{reached.length}</span>
               </summary>
-              <div className="mt-2 flex flex-col gap-3">
+              <div className="mt-2 grid gap-3 lg:grid-cols-2">
                 {reached.map((goal) => (
                   <GoalCard key={goal.id} goal={goal} today={today} />
                 ))}

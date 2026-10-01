@@ -12,7 +12,7 @@ export const MIN_UNIT_PX = 4;
 /** Черта занимает половину места, вторая половина — зазор. */
 const TICK_SHARE = 0.5;
 /** Толще не делаем: на широком экране черты остаются тонкими зарубками. */
-const MAX_TICK_PX = 3;
+export const MAX_TICK_PX = 3;
 /** Промежуток между неделями, в днях. */
 const WEEK_GAP = 1;
 const MAX_ROWS = 4;
@@ -39,18 +39,20 @@ export function weekIndexes(weekdays: number[]): number[] {
   });
 }
 
-function tickWidthFor(unit: number): number {
-  return Math.min(unit * TICK_SHARE, MAX_TICK_PX);
+function tickWidthFor(unit: number, maxTick: number): number {
+  return Math.min(unit * TICK_SHARE, maxTick);
 }
 
 /**
  * @param weekdays день недели каждого дня арки: 1 = пн … 7 = вс
  * @param width ширина контейнера, px
+ * @param maxTick самая толстая черта, px
  */
 export function layoutTally(
   weekdays: number[],
   width: number,
   minUnit: number = MIN_UNIT_PX,
+  maxTick: number = MAX_TICK_PX,
 ): TallyLayout {
   const weeks = weekIndexes(weekdays);
   const weekCount = (weeks.at(-1) ?? 0) + 1;
@@ -62,7 +64,7 @@ export function layoutTally(
     return {
       rows: 1,
       unit: singleUnit,
-      tickWidth: tickWidthFor(singleUnit),
+      tickWidth: tickWidthFor(singleUnit, maxTick),
       positions: weeks.map((week, i) => ({ x: (i + week * WEEK_GAP) * singleUnit, row: 0 })),
     };
   }
@@ -82,7 +84,7 @@ export function layoutTally(
   return {
     rows,
     unit,
-    tickWidth: tickWidthFor(unit),
+    tickWidth: tickWidthFor(unit, maxTick),
     positions: weeks.map((week, i) => {
       const weekInRow = week % weeksPerRow;
       const slot = weekInRow * (7 + WEEK_GAP) + (weekdays[i] - 1);

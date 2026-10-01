@@ -39,8 +39,9 @@ export function LinksTab({ data, arc, today }: LinksTabProps) {
   const words = wordLinks(data, arc, today).slice(0, SHOWN);
 
   return (
-    <div className="flex flex-col gap-4">
-      <p className="on-snow text-sm text-muted">
+    // Десктоп — привычки и слова рядом.
+    <div className="grid gap-4 lg:grid-cols-2 lg:items-start">
+      <p className="on-snow max-w-prose text-sm text-muted lg:col-span-2">
         Сравниваем среднюю оценку в дни, когда что-то было, и в дни, когда не было. Это связь, а не
         причина. Показываем разницу от 0,5 балла, если в каждой группе хотя бы {MIN_GROUP_DAYS}{' '}
         {plural(MIN_GROUP_DAYS, 'день', 'дня', 'дней')}.

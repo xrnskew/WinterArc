@@ -21,33 +21,36 @@ function dayLabel(day: CalendarDay): string {
  */
 export function ArcCalendar({ months }: { months: CalendarMonth[] }) {
   return (
-    <div className="flex flex-col gap-6">
-      {months.map((month) => (
-        <table key={month.title} className="w-full table-fixed border-collapse">
-          <caption className="mb-2 text-left text-base text-text">{month.title}</caption>
-          <thead>
-            <tr>
-              {WEEKDAYS.map((weekday) => (
-                <th key={weekday} scope="col" className="pb-1 text-xs font-normal text-muted">
-                  {weekday}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {month.weeks.map((week, i) => (
-              <tr key={i}>
-                {week.map((day, j) => (
-                  <td key={day?.date ?? `empty-${j}`} className="p-0">
-                    {day && <DayCell day={day} />}
-                  </td>
+    <div>
+      {/* Телефон — месяцы друг под другом, десктоп — три в ряд. */}
+      <div className="grid gap-6 lg:grid-cols-3 lg:gap-10">
+        {months.map((month) => (
+          <table key={month.title} className="w-full table-fixed border-collapse">
+            <caption className="mb-2 text-left text-base text-text">{month.title}</caption>
+            <thead>
+              <tr>
+                {WEEKDAYS.map((weekday) => (
+                  <th key={weekday} scope="col" className="pb-1 text-xs font-normal text-muted">
+                    {weekday}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      ))}
-      <div className="-mt-3 flex items-center justify-between gap-3">
+            </thead>
+            <tbody>
+              {month.weeks.map((week, i) => (
+                <tr key={i}>
+                  {week.map((day, j) => (
+                    <td key={day?.date ?? `empty-${j}`} className="p-0">
+                      {day && <DayCell day={day} />}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ))}
+      </div>
+      <div className="mt-3 flex items-center justify-between gap-3">
         <p className="text-xs text-muted">Черта под числом — индекс дня</p>
         <HeatScale from="0" to="100" />
       </div>

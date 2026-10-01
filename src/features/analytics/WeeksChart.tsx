@@ -35,7 +35,7 @@ export default function WeeksChart({ weeks, theme }: WeeksChartProps) {
       <p className="mb-3 text-sm text-muted">
         Белые — завершённые недели, серая — текущая: она ещё идёт.
       </p>
-      <div style={{ height: 180 }} aria-hidden="true">
+      <div className="h-45 lg:h-65" aria-hidden="true">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={weeks} margin={{ top: 8, right: 4, bottom: 0, left: 0 }}>
             <CartesianGrid vertical={false} stroke={c.gray800} />

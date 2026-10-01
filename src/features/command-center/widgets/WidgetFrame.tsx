@@ -53,7 +53,9 @@ export function WidgetFrame({
       aria-label={info.title}
       className={cx(
         'flex min-w-0 flex-col p-4',
-        !half && 'col-span-2',
+        // Телефон: сетка из двух колонок. Десктоп: ряды, где узкий виджет — доля 260px,
+        // широкий — 520px; свободное место ряда делят соседи, поэтому ряд всегда заполнен.
+        half ? 'lg:grow lg:basis-65' : 'col-span-2 lg:grow-2 lg:basis-130',
         editing && 'border-gray-500',
       )}
     >

@@ -55,6 +55,8 @@ export const winterTheme: ThemeTokens = {
     '4xl': { size: '48px', lineHeight: '1' },
     '5xl': { size: '72px', lineHeight: '0.95' },
     '6xl': { size: '96px', lineHeight: '0.9' },
+    // Только отсчёт арки на десктопе.
+    '7xl': { size: '144px', lineHeight: '0.85' },
   },
 
   radius: { sm: '2px', md: '4px', lg: '8px' },

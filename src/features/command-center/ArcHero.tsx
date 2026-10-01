@@ -57,7 +57,7 @@ export function ArcHero({ arc, data, today, firstOpen }: ArcHeroProps) {
       <p className="mt-1 text-sm text-muted">{formatRange(arc.startDate, arc.endDate)}</p>
 
       <div className="mt-8">
-        <BigNumber value={number} size="xl" fromZero={firstOpen} />
+        <BigNumber value={number} size="xl" fromZero={firstOpen} className="lg:text-7xl" />
         <p className="mt-1 text-sm text-muted">{label}</p>
       </div>
 

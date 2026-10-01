@@ -98,7 +98,7 @@ export function CommandCenterScreen() {
             }
           />
         ) : (
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-2 gap-3 lg:flex lg:flex-wrap lg:items-start lg:gap-4">
             {widgets.map((widget, i) => {
               const Widget = WIDGET_COMPONENTS[widget.type];
               return (

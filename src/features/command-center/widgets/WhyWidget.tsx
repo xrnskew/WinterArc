@@ -14,5 +14,6 @@ export function WhyWidget({ arc }: WidgetProps) {
       </p>
     );
   }
-  return <p className="text-base whitespace-pre-line text-text">{arc.why}</p>;
+  // Длинные строки на широком экране читать трудно — не шире ~65 знаков.
+  return <p className="max-w-prose text-base whitespace-pre-line text-text">{arc.why}</p>;
 }

@@ -11,6 +11,7 @@ import { EmptyState } from '../../design/ui/EmptyState';
 import { GlassCard } from '../../design/ui/GlassCard';
 import { ScreenHeader } from '../../design/ui/ScreenHeader';
 import { Sheet } from '../../design/ui/Sheet';
+import { StatTiles } from '../../design/ui/StatTiles';
 import { THEMES } from '../../design/themes';
 import { useToday } from '../../hooks/useToday';
 import { useAppStore } from '../../store/useAppStore';
@@ -71,18 +72,19 @@ export function HabitDetailScreen() {
       <ScreenHeader title={habit.name} description={describeHabit(draftFromHabit(habit))} />
 
       <div className="flex flex-col gap-4">
-        <GlassCard as="section" aria-label="Статистика" className="grid grid-cols-2 p-0">
-          {tiles.map((tile, i) => (
-            <div
-              key={tile.label}
-              className={`min-w-0 overflow-hidden p-4 ${i % 2 === 1 ? 'border-l border-gray-800' : ''} ${i > 1 ? 'border-t border-gray-800' : ''}`}
-            >
-              <BigNumber value={tile.value} size="sm" decimals={tile.decimals} />
-              {tile.suffix && <span className="numeric text-xl text-number">{tile.suffix}</span>}
-              <p className="mt-1 text-sm text-muted">{tile.label}</p>
-            </div>
-          ))}
-        </GlassCard>
+        <StatTiles
+          label="Статистика"
+          tiles={tiles.map((tile) => ({
+            key: tile.label,
+            label: tile.label,
+            value: (
+              <>
+                <BigNumber value={tile.value} size="sm" decimals={tile.decimals} />
+                {tile.suffix && <span className="numeric text-xl text-number">{tile.suffix}</span>}
+              </>
+            ),
+          }))}
+        />
 
         {chart.points.length > 0 && (
           <GlassCard as="section" className="p-5">

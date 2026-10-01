@@ -69,5 +69,12 @@ export const MORE_ITEMS: NavItem[] = [
 /** Нижний бар на телефоне: чек-ин в центре. */
 export const MOBILE_BAR = { left: [center, habits], checkin, right: [goals, more] };
 
-/** Боковая панель на десктопе: всё сразу, без «Ещё». */
-export const DESKTOP_RAIL: NavItem[] = [center, checkin, habits, goals, ...MORE_ITEMS];
+/**
+ * Боковая панель на десктопе: всё сразу, без «Ещё».
+ * Сверху — чек-ин (главное ежедневное действие), внизу — настройки.
+ */
+export const SIDEBAR = {
+  checkin,
+  main: [center, habits, goals, ...MORE_ITEMS.filter((item) => item.to !== PATHS.settings)],
+  bottom: MORE_ITEMS.filter((item) => item.to === PATHS.settings),
+};

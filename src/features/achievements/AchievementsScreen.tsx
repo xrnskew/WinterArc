@@ -58,7 +58,7 @@ export function AchievementsScreen() {
                   {subject && group !== 'arc' && (
                     <h3 className="mb-1 text-sm text-muted">{subject}</h3>
                   )}
-                  <ul className="grid grid-cols-3 gap-x-2 gap-y-4">
+                  <ul className="grid grid-cols-3 gap-x-2 gap-y-4 md:grid-cols-4 lg:grid-cols-6">
                     {groupItems
                       .filter((item) => item.subject === subject)
                       .map((item) => (

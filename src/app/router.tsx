@@ -13,6 +13,16 @@ import { PATHS } from './routes';
  * все файлы заранее лежат в кэше PWA.
  */
 
+/**
+ * Настройки маршрута для оболочки. wide — экран занимает всю ширину десктопа
+ * (командный центр, аналитика); остальные — колонкой удобной для чтения ширины.
+ */
+export interface RouteHandle {
+  wide?: boolean;
+}
+
+const WIDE: RouteHandle = { wide: true };
+
 /** Витрина дизайн-системы — только при разработке, в сборку не попадает. */
 const devRoutes: RouteObject[] = import.meta.env.DEV
   ? [
@@ -29,7 +39,7 @@ export const router = createBrowserRouter([
     element: <AppShell />,
     HydrateFallback: LoadingScreen,
     children: [
-      { path: PATHS.center, element: <CommandCenterScreen /> },
+      { path: PATHS.center, element: <CommandCenterScreen />, handle: WIDE },
       { path: PATHS.checkin, element: <CheckinScreen /> },
       { path: PATHS.habits, element: <HabitsScreen /> },
       {
@@ -58,6 +68,7 @@ export const router = createBrowserRouter([
       },
       {
         path: PATHS.analytics,
+        handle: WIDE,
         lazy: async () => ({
           Component: (await import('../features/analytics/AnalyticsScreen')).AnalyticsScreen,
         }),

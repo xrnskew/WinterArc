@@ -63,4 +63,12 @@ describe('layoutTally', () => {
     const layout = layoutTally(arcWeekdays(365, 1), 328);
     expect(layout.rows).toBeGreaterThan(2);
   });
+
+  it('десктоп 1440px: одна строка во всю ширину, черта не толще заданной', () => {
+    const layout = layoutTally(winterArc, 1104, MIN_UNIT_PX, 5);
+    expect(layout.rows).toBe(1);
+    expect(layout.tickWidth).toBe(5);
+    const last = layout.positions.at(-1)!;
+    expect(last.x + layout.tickWidth).toBeGreaterThan(1104 * 0.95);
+  });
 });
