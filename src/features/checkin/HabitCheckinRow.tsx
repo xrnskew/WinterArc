@@ -1,13 +1,14 @@
 import { Link } from 'react-router';
 import { habitPath } from '../../app/routes';
 import { weekStart } from '../../domain/dates';
-import { describeSchedule, formatMinutes } from '../../domain/habits';
+import { describeSchedule, formatMinutes, stepperStep } from '../../domain/habits';
 import { dailyTarget, getLog, habitStreak, weekProgress } from '../../domain/progress';
 import { isWeeklyHabit } from '../../domain/schedule';
 import type { AppData, DateKey, Habit } from '../../domain/types';
 import { CheckSquare } from '../../design/ui/CheckSquare';
 import { HabitIcon } from '../../design/ui/HabitIcon';
 import { Stepper } from '../../design/ui/Stepper';
+import { formatNumber } from '../../lib/formatNumber';
 import { plural } from '../../lib/plural';
 import { useAppStore } from '../../store/useAppStore';
 
@@ -39,7 +40,7 @@ export function HabitCheckinRow({ habit, data, date }: HabitCheckinRowProps) {
         ? `${formatMinutes(week.done)} из ${formatMinutes(week.target)} за неделю`
         : `${week.done} из ${week.target} на этой неделе`;
   } else if (habit.kind === 'count') {
-    detail = `${value} из ${habit.dailyTarget} ${habit.unit}`;
+    detail = `${formatNumber(value)} из ${formatNumber(habit.dailyTarget)} ${habit.unit}`;
   } else if (habit.kind === 'time') {
     detail = `${formatMinutes(value)} из ${formatMinutes(habit.targetMinutes)}`;
   } else {
@@ -75,7 +76,7 @@ export function HabitCheckinRow({ habit, data, date }: HabitCheckinRowProps) {
           <Stepper
             value={value}
             onChange={setValue}
-            step={habit.kind === 'time' ? 5 : 1}
+            step={stepperStep(habit)}
             label={`${habit.name}, ${habit.kind === 'time' ? 'минут' : habit.unit}`}
           />
         </div>

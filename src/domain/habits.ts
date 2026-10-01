@@ -1,3 +1,4 @@
+import { formatNumber } from '../lib/formatNumber';
 import { plural } from '../lib/plural';
 import type {
   AccentKey,
@@ -234,6 +235,17 @@ export function moveHabit(data: AppData, habitId: Id, step: -1 | 1): AppData {
   };
 }
 
+/**
+ * На сколько меняет значение кнопка «±» в чек-ине.
+ * Время — по 5 минут. Количество — по 1, а у больших целей — десятая часть
+ * порядка цели: шаги 10 000 → по 1000, 500 страниц → по 10. Точное число можно ввести руками.
+ */
+export function stepperStep(habit: Habit): number {
+  if (habit.kind === 'time') return 5;
+  if (habit.kind !== 'count' || habit.dailyTarget < 100) return 1;
+  return 10 ** (Math.floor(Math.log10(habit.dailyTarget)) - 1);
+}
+
 // ── Подписи ──────────────────────────────────────────────
 
 export const HABIT_KIND_LABELS: Record<HabitKind, string> = {
@@ -291,7 +303,7 @@ export function describeTarget(
     case 'check':
       return 'сделал или нет';
     case 'count':
-      return `${habit.dailyTarget} ${habit.unit}`;
+      return `${formatNumber(habit.dailyTarget)} ${habit.unit}`;
     case 'time':
       return `${formatMinutes(habit.targetMinutes)} в ${habit.targetPeriod === 'day' ? 'день' : 'неделю'}`;
   }

@@ -6,6 +6,7 @@ import {
   EMPTY_HABIT_DRAFT,
   formatMinutes,
   habitFromDraft,
+  stepperStep,
   validateHabitDraft,
   type HabitDraft,
 } from './habits';
@@ -112,5 +113,15 @@ describe('подписи', () => {
     expect(describeTarget(draft({ kind: 'time', targetMinutes: 180, targetPeriod: 'week' }))).toBe(
       '3 ч в неделю',
     );
+  });
+});
+
+describe('шаг степпера в чек-ине', () => {
+  it('время — по 5 минут, количество — по 1, большие цели — крупнее', () => {
+    const habit = (patch: Partial<HabitDraft>) => habitFromDraft(draft(patch), 'h', NOW);
+    expect(stepperStep(habit({ kind: 'time', targetMinutes: 30 }))).toBe(5);
+    expect(stepperStep(habit({ kind: 'count', unit: 'ч', dailyTarget: 7 }))).toBe(1);
+    expect(stepperStep(habit({ kind: 'count', unit: 'страниц', dailyTarget: 500 }))).toBe(10);
+    expect(stepperStep(habit({ kind: 'count', unit: 'шагов', dailyTarget: 10000 }))).toBe(1000);
   });
 });

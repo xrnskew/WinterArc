@@ -41,7 +41,7 @@ export type OnboardingAction =
 
 /**
  * Начальное состояние. Привычки прошлой арки (если есть) уже выбраны:
- * чаще всего их хотят продолжить.
+ * чаще всего их хотят продолжить. В первой арке выбран базовый набор шаблонов.
  */
 export function initOnboarding(today: DateKey, existingHabits: Habit[]): OnboardingState {
   const kept: HabitChoice[] = existingHabits.map((habit) => ({
@@ -56,12 +56,15 @@ export function initOnboarding(today: DateKey, existingHabits: Habit[]): Onboard
   const fresh = HABIT_TEMPLATES.filter(
     (template) => !existingHabits.some((habit) => sameName(habit.name, template.draft.name)),
   );
+  // Первая арка — базовые шаблоны уже отмечены. В следующих арках отмечены только
+  // привычки прошлой: человек уже собрал свой набор, лишнего не добавляем.
+  const firstArc = existingHabits.length === 0;
   const templates: HabitChoice[] = fresh.map((template) => ({
     key: `template:${template.key}`,
     source: 'template',
     habitId: null,
     draft: template.draft,
-    selected: false,
+    selected: firstArc && template.preselected,
   }));
   return {
     step: 0,

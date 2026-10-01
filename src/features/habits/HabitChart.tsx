@@ -14,6 +14,7 @@ import { ru } from 'date-fns/locale';
 import { formatDayMonth, fromDateKey } from '../../domain/dates';
 import type { ChartPoint, HabitChartData } from '../../domain/habitCharts';
 import type { ThemeTokens } from '../../design/tokens';
+import { formatNumber } from '../../lib/formatNumber';
 import { niceTicks } from '../../lib/niceTicks';
 
 /**
@@ -44,16 +45,16 @@ function pointLabel(chart: HabitChartData, point: ChartPoint): string {
 function chartCaption(chart: HabitChartData): string {
   switch (chart.kind) {
     case 'daily':
-      return `Белые — цель дня выполнена. Линия — цель: ${chart.target} ${chart.unit}.`;
+      return `Белые — цель дня выполнена. Линия — цель: ${formatNumber(chart.target ?? 0)} ${chart.unit}.`;
     case 'weekly':
-      return `Белые — неделя выполнена. Линия — цель: ${chart.target} ${chart.unit} в неделю.`;
+      return `Белые — неделя выполнена. Линия — цель: ${formatNumber(chart.target ?? 0)} ${chart.unit} в неделю.`;
     case 'weeklyRate':
       return 'Доля дней по плану, когда отмечено. Белые — все дни недели.';
   }
 }
 
 function pointValue(chart: HabitChartData, point: ChartPoint): string {
-  return chart.unit === '%' ? `${point.value}%` : `${point.value} ${chart.unit}`;
+  return chart.unit === '%' ? `${point.value}%` : `${formatNumber(point.value)} ${chart.unit}`;
 }
 
 export default function HabitChart({ chart, theme }: HabitChartProps) {
@@ -92,7 +93,9 @@ export default function HabitChart({ chart, theme }: HabitChartProps) {
   );
   const yAxis = (
     <YAxis
-      width={36}
+      // Под «10 000» нужно больше места, чем под «40».
+      width={maxValue >= 1000 ? 52 : 36}
+      tickFormatter={(value: number) => formatNumber(value)}
       allowDecimals={false}
       tick={axisTick}
       tickLine={false}

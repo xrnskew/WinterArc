@@ -115,7 +115,9 @@ function HabitChoiceRow({ choice, onToggle, onEdit }: HabitChoiceRowProps) {
           className={cx('shrink-0', selected ? 'text-number' : 'text-muted')}
         />
         <span className="min-w-0">
-          <span className={cx('block truncate text-base', selected ? 'text-number' : 'text-text')}>
+          <span
+            className={cx('block text-base break-words', selected ? 'text-number' : 'text-text')}
+          >
             {draft.name}
           </span>
           <span className="block text-sm text-muted">{describeHabit(draft)}</span>
